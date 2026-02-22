@@ -10,20 +10,27 @@
 ![Deterministic](https://img.shields.io/badge/deterministic-yes-success)
 ![No network](https://img.shields.io/badge/network-none-lightgrey)
 
-🇧🇷 [**Ler em Português**](README-ptbr.md)
+🇧🇷 [**Leia em português**](README-prbr.md)
 
-**SeedCTL** is a **deterministic, auditable, and security-focused** Bitcoin wallet generator, written in [**Rust**](https://rust-lang.org/) for **offline** mode.
+**SeedCTL** is a **multichain** wallet generator (Bitcoin, Ethereum, Tron and Solana), **deterministic, auditable and security‑focused**, written in [**Rust**](https://rust-lang.org/) for **offline** use.
 
-This program allows you to generate a Bitcoin wallet from **physical data (data/dice) 🎲** and/or **system entropy**, producing:
+This program lets you generate (or import) a BIP39 seed and derive wallets for multiple networks from **physical data (dice) 🎲** and/or **system entropy**, producing:
 
 - BIP39 mnemonic (12 or 24 words)
 - Support for **optional passphrase**
-- BIP84 derivation (Native SegWit – bc1)**
-- Support for **Mainnet and Testnet**
-- Display of [**Word Indexes BIP39**](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt)
-- Generation of **deterministic addresses**
+- **BIP84** derivation (Native SegWit – bc1) for Bitcoin (`m/84'/0'/0'` and `m/84'/1'/0'`)
+- **BIP44** derivation for Ethereum (`m/44'/60'/0'/0/x`) and **Ledger style** (`m/44'/60'/x'/0/0`)
+- **BIP44** derivation for Tron (`m/44'/195'/0'/0/x`)
+- **BIP44** derivation for Solana (`m/44'/501'/index'/0'`)
+- Support for **Mainnet and Testnet** (Bitcoin; other networks are focused on mainnet for now)
+- Display of [**BIP39 Word Indexes**](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt)
+- Generation of **deterministic addresses** for:
+  - **Bitcoin**: `bc1...` / `tb1...` (Native SegWit)
+  - **Ethereum**: `0x...` (EIP‑55 checksum)
+  - **Tron**: `T...` (base58check with 0x41 prefix)
+  - **Solana**: base58 Ed25519 public key addresses
 
-The main objective is to allow **secure, verifiable, and offline generation** of Bitcoin seeds, with a high level of paranoia and total control of the process.
+The main goal is to allow **secure, verifiable, offline generation** of reusable BIP39 seeds across multiple coins, with a high level of paranoia and full control over the process.
 
 ---
 
@@ -54,68 +61,70 @@ Maintenance and activity indicators for the canonical **GitHub** repository.
 - No network dependency
 - No data transmission
 - No disk persistence
-- Ideal for **offline / air-gapped** use
+- Ideal for **offline / air‑gapped** use
 - Compatible with manual verification (dice, word indexes, derivation path)
 - Clear separation between **deterministic mode** and **hybrid mode**
 
 > **WARNING**
 > This program **displays sensitive information** (mnemonic, passphrase, keys).
-> Use **only in a secure and offline environment**. Recommended for use with [Tails](https://tails.net/)
+> Use **only in a secure and offline environment**. Using it with [Tails](https://tails.net/) or similar is recommended.
 
 ---
 
 ## Features
 
 - BIP39 – 12 or 24 words
-- Entropy via physical data (1–6)
-- Hybrid entropy (physical data + system RNG)
-- Automatic generation or manual data entry
-- Visual confirmation of the data sequence
+- Entropy via physical dice (1–6)
+- Hybrid entropy (dice + system RNG)
+- Automatic generation or manual dice entry
+- Visual confirmation of the dice sequence
 - Optional passphrase (BIP39)
-- Mainnet and Testnet
-- BIP84 (Native SegWit)
-- Display of **Word Indexes** (base 1, format `0001`)
-- Generation of `bc1` / `tb1` addresses
+- Initial menu with **Generate new wallet** and **Import existing wallet** (existing seed)
+- Network selection: **Bitcoin, Ethereum, Tron, Solana**
+- Support for Mainnet and Testnet (Bitcoin)
+- BIP84 derivation (Bitcoin), BIP44 derivation (Ethereum, Tron, Solana)
+- Display of **Word Indexes** (base‑1, format `0001`)
+- Address generation:
+  - `bc1` / `tb1` (Bitcoin)
+  - `0x...` (Ethereum)
+  - `T...` (Tron)
+  - base58 (Solana)
 
 ---
 
 ## Documentation
 
-- **Deterministic Portfolio Replication**
+- **Deterministic wallet reproduction**
+  See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)
 
-See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md)
-
-- **Binary and Release Verification (SHA256 + GPG)**
-
-See [`VERIFYING_RELEASES.md`](VERIFYING_RELEASES.md)
+- **Binary and release verification (SHA256 + GPG)**
+  See [`VERIFYING_RELEASES.md`](VERIFYING_RELEASES.md)
 
 ---
 
 ## Entropy Modes
 
-The program offers **two distinct modes**, with different objectives.
+The program offers **two distinct modes**, with different goals.
 
 ### Manual Mode (Deterministic)
 
-Suitable for:
+Recommended for:
 
-- Recovering an existing portfolio
+- Recovering an existing wallet
 - Auditing
 - Reproducible generation ceremonies
 - Independent verification
 
-**How ​​it works:**
+**How it works:**
 
-- The user manually enters the data sequence (1–6)
-
+- The user manually enters the dice sequence (1–6)
 - No system entropy is used
-- The same sequence + same passphrase ⇒ **always the same portfolio**
+- Same sequence + same passphrase ⇒ **always the same wallet**
 
 **Conceptual model:**
 
 ```bash
 entropy = SHA256(dice_entropy)
-
 ```
 
 This mode is **100% deterministic and reproducible**.
@@ -124,44 +133,38 @@ This mode is **100% deterministic and reproducible**.
 
 ### Automatic (Hybrid) Mode
 
-Suitable for:
+Recommended for:
 
 - Creating new wallets
-- Increasing entropy against human error
+- Increasing entropy against human failures
+- Defense in depth
 
-Defense in depth
-
-**How ​​it works:**
+**How it works:**
 
 - The program automatically generates:
-
-- Random physical data (1–6)
-
-- System-safe entropy (CSPRNG)
-
-- The two sources are combined and hashed
+  - Random physical dice (1–6)
+  - Secure system entropy (CSPRNG)
+- Both sources are combined and hashed
 
 **Conceptual model:**
 
 ```bash
 entropy_final = SHA256(dice_entropy || hex_entropy)
-
 ```
 
 ✔ Even if one source fails, the other preserves security
-✔ Not exclusively dependent on human error
+✔ Not exclusively dependent on the human
 ✔ Not exclusively dependent on the system
 
 **Important:**
-This mode is **not reproducible** if only the dice are annotated.
-
-For future reproduction, the manual mode must be used.
+This mode is **not reproducible** if only the dice are recorded.
+For future reproducibility, the manual mode must be used.
 
 ---
 
 ## Word Indexes (BIP39)
 
-Each word in the mnemonic is accompanied by its index in the BIP39 wordlist:
+Each mnemonic word is accompanied by its index in the BIP39 wordlist:
 
 ```bash
 01. 0001 abandon
@@ -169,32 +172,75 @@ Each word in the mnemonic is accompanied by its index in the BIP39 wordlist:
 03. 0097 able
 ```
 
-## Derivation Path
+## Derivation Paths per Network
 
-Mainnet: m/84'/0'/0'
-Testnet: m/84'/1'/0'
+- **Bitcoin**
+  - Mainnet: `m/84'/0'/0'`
+  - Testnet: `m/84'/1'/0'`
+
+- **Ethereum**
+  - Standard (MetaMask and others): `m/44'/60'/0'/0/x`
+  - Ledger style: `m/44'/60'/x'/0/0`
+
+- **Tron**
+  - BIP44 standard: `m/44'/195'/0'/0/x`
+
+- **Solana**
+  - BIP44 standard: `m/44'/501'/index'/0'`
 
 ---
 
 ## Addresses
 
-Native SegWit address generation:
+Deterministic address generation from the chosen paths:
 
-```bash
-m/84'/0'/0'/0/0 → bc1...
+- **Bitcoin**
 
-```
+  ```bash
+  m/84'/0'/0'/0/0 → bc1...
+  ```
+
+- **Ethereum**
+
+  ```bash
+  m/44'/60'/0'/0/0 → 0x...
+  ```
+
+- **Tron**
+
+  ```bash
+  m/44'/195'/0'/0/0 → T...
+  ```
+
+- **Solana**
+
+  ```bash
+  m/44'/501'/0'/0' (index 0) → <base58 address>
+  ```
 
 ---
 
 ## Compatibility
 
-- Sparrow Wallet
-- Electrum
-- BlueWallet
-- Bitcoin Core
+- **Bitcoin**
+  - Sparrow Wallet
+  - Electrum
+  - BlueWallet
+  - Bitcoin Core
+  - Any BIP39/BIP84‑compatible wallet
 
-Any BIP39/BIP84 wallet Compatible
+- **Ethereum**
+  - MetaMask
+  - Ledger Live (standard / Ledger paths)
+  - Other BIP39/BIP44 wallets with `m/44'/60'/0'/0/x`
+
+- **Tron**
+  - TronLink and wallets using `m/44'/195'/0'/0/x`
+
+- **Solana**
+  - Phantom
+  - Solana CLI / `solana-keygen`
+  - Other wallets using `m/44'/501'/index'/0'`
 
 ---
 
@@ -202,7 +248,7 @@ Any BIP39/BIP84 wallet Compatible
 
 This software is provided “as is,” without warranties.
 
-You are 100% responsible for the use, storage, and security of the generated keys.
+You are 100% responsible for the use, storage and security of the generated keys.
 
 ---
 
@@ -214,16 +260,16 @@ You are 100% responsible for the use, storage, and security of the generated key
 - Keyloggers
 - Screen capture
 - Compromised firmware
-- Supply-chain attacks
+- Supply‑chain attacks
 
 **This software PROTECTS against:**
 
-- System RNG failures (via physical data)
+- System RNG failures (via physical dice)
 - Dependence on external services
 - Opaque seed generation
 - Lack of auditability
 
-For maximum security, use on a clean, temporary, offline computer.
+For maximum security, use it on a clean, temporary, offline computer.
 
 ---
 
@@ -235,19 +281,18 @@ Check with:
 
 ```bash
 rustc --version
-
 ```
 
 ---
 
 ## Credits
 
-This project is built upon well-established Bitcoin standards and the collective effort of the open-source community.
+This project is built upon well‑established Bitcoin standards and the collective effort of the open‑source community.
 
 ### Author & Collaborators
 
-- **William C. Canin** — Creator & Maintainer
-- **[Your Name Here]** — Become a contributor! Submit a Pull Request or report an issue.
+- **William C. Canin** — Creator & Maintainer
+- **[Your Name Here]** — Become a contributor! Submit a pull request or report an issue.
 
 ### Bitcoin Improvement Proposals (BIPs)
 
@@ -257,15 +302,15 @@ This project is built upon well-established Bitcoin standards and the collective
 
 ### Rust Ecosystem
 
-SeedCTL is built using high-quality open-source libraries from the Rust community. We stand on the shoulders of giants to ensure security and performance.
+SeedCTL is built using high‑quality open‑source libraries from the Rust community. We stand on the shoulders of giants to ensure security and performance.
 
 You can find the full list of libraries and their versions in our [Cargo.toml](./Cargo.toml).
 
-Special thanks to the maintainers of `bitcoin`, `bip39`, and all other crates that make this project possible.
+Special thanks to the maintainers of `bitcoin`, `bip39` and all other crates that make this project possible.
 
 ### Community Acknowledgments
 
-Special thanks to the **Bitcoin Core** developers and the global open-source community for prioritizing transparency and user sovereignty.
+Special thanks to the **Bitcoin Core** developers and the global open‑source community for prioritizing transparency and user sovereignty.
 
 ---
 
@@ -282,4 +327,5 @@ https://github.com/sponsors/williamcanin
 
 ---
 
-This project was built with a strong focus on **security, transparency, and verifiability**, aiming to give users complete control over their Bitcoin keys.
+This project was built with a strong focus on **security, transparency and verifiability**, aiming to give users complete control over their keys and derivations in Bitcoin, Ethereum, Tron and Solana.
+

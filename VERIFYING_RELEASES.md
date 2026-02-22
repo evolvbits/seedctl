@@ -42,7 +42,7 @@ For stronger guarantees, combine this with **reproducible builds** (see `REPRODU
 
 ## Step 1 — Download release files
 
-From the GitHub Releases page, download **all** of the following into the same directory:
+From the GitHub Releases page, download **all** the following into the same directory:
 
 * `seedctl-linux`
 * `seedctl-windows.exe`

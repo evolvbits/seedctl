@@ -38,6 +38,6 @@ The user is fully responsible for:
 - Environment security
 - Key storage
 - Backup strategy
-- Understanding Bitcoin key management
+- Understanding key management and derivation paths for Bitcoin, Ethereum, Tron and Solana
 
 Use at your own risk.
