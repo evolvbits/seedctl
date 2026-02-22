@@ -1,31 +1,44 @@
-[package]
-name = "seedctl"
-description = "A deterministic, auditable, and security-focused Bitcoin wallet generator."
+[workspace]
+resolver = "2"
+members = ["crates/*", "seedctl"]
+
+[workspace.package]
+description = "Deterministic, auditable, security-focused multichain wallet manager."
 repository = "https://github.com/williamcanin/seedctl"
 version = "0.2.0"
 authors = ["William C. Canin <william.costa.canin@gmail.com>"]
 edition = "2024"
+rust-version = "1.89"
 
-[package.metadata]
-copyright_year = "2026"
-maintainer = "William C. Canin"
-
-[dependencies]
+[workspace.dependencies]
+seedctl-core = { path = "crates/seedctl-core" }
+seedctl-btc = { path = "crates/seedctl-btc" }
+seedctl-eth = { path = "crates/seedctl-eth" }
+seedctl-trx = { path = "crates/seedctl-trx" }
+seedctl-sol = { path = "crates/seedctl-sol" }
+seedctl-ltc = { path = "crates/seedctl-ltc" }
+seedctl-matic = { path = "crates/seedctl-matic" }
+#seedctl-ada = { path = "crates/seedctl-ada" }
+#seedctl-xmr = { path = "crates/seedctl-xmr" }
 anyhow = "1.0.101"
-bip39 = "2.2.2"
-bitcoin = "0.32.8"
-console = "0.16.2"
-crossterm = "0.29.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 dialoguer = "0.12.0"
+console = "0.16.2"
 hex = "0.4.3"
-if-addrs = "0.15.0"
 rand = "0.10.0"
-serde = { version = "1.0.228", features = ["derive"]}
-serde_json = "1.0.149"
+crossterm = "0.29.0"
 sha2 = "0.10.9"
+bip39 = "2.2.2"
 
-[profile.release]
-panic = "abort"
-lto = true
-strip = true
+
+# -------- Optimization --------
+[profile.dev.package."*"]
+opt-level = 0
+incremental = true
+debug = true
+
+[profile.release.package."*"]
+opt-level = 3
 codegen-units = 1
+debug = false
