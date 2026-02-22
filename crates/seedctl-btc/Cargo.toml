@@ -1,0 +1,17 @@
+[package]
+name = "seedctl-btc"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+# seedctl dependencies (crates)
+seedctl-core.workspace = true
+# Own dependencies
+bitcoin = "0.32.8"
+bip39 = "2"
+# Global dependencies
+dialoguer.workspace = true
+console.workspace = true
+serde_json.workspace = true
+
+

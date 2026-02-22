@@ -1,0 +1,9 @@
+pub const PROJECT_NAME: &str = env!("CARGO_PKG_NAME");
+pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const PROJECT_REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
+pub const PROJECT_DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
+pub const COPYRIGHT_YEAR: &str = env!("COPYRIGHT_YEAR");
+pub const PROJECT_MAINTAINER: &str = env!("PROJECT_MAINTAINER");
+pub const GIT_COMMIT: &str = env!("GIT_COMMIT");
+pub const GIT_DATE: &str = env!("GIT_DATE");
+pub const BUILD_PROFILE: &str = env!("BUILD_PROFILE");

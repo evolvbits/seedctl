@@ -1,0 +1,22 @@
+[package]
+name = "seedctl-sol"
+description.workspace = true
+repository.workspace = true
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+seedctl-core.workspace = true
+
+hex.workspace = true
+bip39.workspace = true
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+ed25519-hd-key = "0.3"
+bs58 = "0.5"
+
+dialoguer.workspace = true
+console.workspace = true
+serde_json.workspace = true
+

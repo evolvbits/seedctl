@@ -1,0 +1,20 @@
+[package]
+name = "seedctl-core"
+version.workspace = true
+description.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+dialoguer.workspace = true
+console.workspace = true
+rand.workspace = true
+crossterm.workspace = true
+serde.workspace = true
+sha2.workspace = true
+bip39 = "2.2.2"
+bip32 = { version = "0.5", features = ["secp256k1"] }
+
+
+
