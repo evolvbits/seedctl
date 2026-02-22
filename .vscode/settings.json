@@ -60,7 +60,7 @@
   "diffEditor.ignoreTrimWhitespace": true,
   "explorer.fileNesting.enabled": true,
   "window.commandCenter": true,
-  "workbench.iconTheme": "vscode-jetbrains-icon-theme-2023-dark",
+  "workbench.iconTheme": "vscode-jetbrains-icon-theme-2023-auto",
 
   // Python
   "[python]": {
