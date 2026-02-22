@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=SeedCTL
-Comment=A deterministic, auditable, and security-focused Bitcoin wallet generator.
+Comment=Deterministic, auditable, security-focused multichain wallet generator.
 Exec=AppRun
 Icon=seedctl
 Type=Application

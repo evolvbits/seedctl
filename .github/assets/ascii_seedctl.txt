@@ -56,8 +56,28 @@
                             :.
 
 
+        ...                  ...
+        .****++-:           .:==+++=.
+         =***++***-       :+********
+          =***+===*+.   .+*+==++**+.
+           :+****=-+*. .*+--+****=.
+             .-=+*+-=+.++-+**++-.
+                     +++.:::.
+                     :*-
+                     :*:
+                 .-++****+=:
+               .=****=--+***+:
+              .+****.    =*+**-
+              +****+:.  .=*****.
+              ***=: .:=-: .-+**-
+              =**.    =.    +**.
+              .+*+-.:-+=:.:=**:
+                =***********=.
+                 .-=*****+-.
+                     :-:.
 
-Credits: ascii-image-converter (./ascii-image-converter.exe ./seedctl.png -C)
+
+Credits: ascii-image-converter (ascii-image-converter seedctl.png -W 40)
 
 
              ___             _  ___ _____ _
@@ -65,5 +85,5 @@ Credits: ascii-image-converter (./ascii-image-converter.exe ./seedctl.png -C)
             \__ \/ -_) -_) _` | (__  | | | |__
             |___/\___\___\__,_|\___| |_| |____| version: {version}
 
-Credits: https://patorjk.com/software/taag/
+Credits: https://patorjk.com/software/taag/ -> Ogre
 

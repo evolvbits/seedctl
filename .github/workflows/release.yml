@@ -50,19 +50,24 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt update
-          sudo apt install -y patchelf wget xz-utils file
+          sudo apt install -y wget xz-utils file
 
-          # Download appimagetool
+          # Download appimagetool (no FUSE required)
           wget -O appimagetool.AppImage https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool.AppImage
+          ./appimagetool.AppImage --appimage-extract
+          mv squashfs-root appimagetool
 
           # Prepare AppDir
           cp -r .github/AppImage AppDir-build
           mkdir -p AppDir-build/usr/bin
+      
+          strip target/release/seedctl || true
           cp target/release/seedctl AppDir-build/usr/bin/seedctl
 
           # Build AppImage
-          ./appimagetool.AppImage AppDir-build dist/seedctl-${{ steps.version.outputs.version }}-linux-x86_64.AppImage
+          mkdir -p dist
+          ./appimagetool/AppRun AppDir-build dist/seedctl-${{ steps.version.outputs.version }}-linux-x86_64.AppImage
 
       - name: Prepare artifacts (Linux)
         if: runner.os == 'Linux'
