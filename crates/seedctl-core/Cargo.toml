@@ -13,6 +13,7 @@ rand.workspace = true
 crossterm.workspace = true
 serde.workspace = true
 sha2.workspace = true
+if-addrs = "0.15.0"
 bip39 = "2.2.2"
 bip32 = { version = "0.5", features = ["secp256k1"] }
 
