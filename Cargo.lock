@@ -1856,6 +1856,7 @@ dependencies = [
  "console",
  "crossterm",
  "dialoguer",
+ "if-addrs",
  "rand 0.10.0",
  "serde",
  "sha2",
