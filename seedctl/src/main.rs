@@ -6,12 +6,13 @@ use seedctl_core::{
   args,
   entropy::{print_entropy_mode, resolve_final_entropy},
   options::entropy_type,
+  security::Security,
   ui::{dialoguer_theme, exit_confirm},
   utils::dice_hash,
 };
 use std::error::Error;
 
-use crate::utils::{security::ensure_offline, copyright_phrase, meta};
+use crate::utils::{connection::Connection, copyright_phrase, meta};
 use console::style;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -32,10 +33,11 @@ fn main() -> Result<(), Box<dyn Error>> {
       println!("{}", style("\n:: Welcome to").bold());
 
       // Check connection internet. If connection = closed
-      ensure_offline();
+      Connection::check();
 
       // Show warning security
-      utils::security::warning(seedctl_core::ui::WARNING_TEXT, "I UNDERSTOOD")?;
+      let security = Security;
+      security.warning("I UNDERSTOOD")?;
 
       // Show slogan
       utils::slogan::slogan_view(true, true);

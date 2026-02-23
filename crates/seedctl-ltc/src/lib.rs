@@ -1,10 +1,12 @@
-use bech32::{self, Hrp, Bech32};
-use bip32::{DerivationPath, XPrv};
+use bech32::{self, Bech32, Hrp};
+use bip32::{DerivationPath, XPrv, XPub};
 use bip39::Mnemonic;
 use console::style;
 use ripemd::Ripemd160;
 use seedctl_core::{
   export,
+  traits::chain::Chain,
+  types::address::AddressRow,
   ui::{print_address_table, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{format_fingerprint_hex, print_mnemonic},
@@ -19,6 +21,59 @@ enum LtcNetwork {
   Testnet,
 }
 
+/// Concrete implementation of the generic `Chain` trait for Litecoin.
+struct LtcChain;
+
+impl Chain for LtcChain {
+  type Address = AddressRow;
+  type PublicKey = XPub;
+  type PrivateKey = XPrv;
+
+  fn name() -> &'static str {
+    "Litecoin (LTC)"
+  }
+
+  fn symbol() -> &'static str {
+    "LTC"
+  }
+
+  // SLIP‑44: 2' for Litecoin mainnet
+  fn coin_type() -> u32 {
+    2
+  }
+
+  fn derive_account(seed: &[u8], account: u32) -> Self::PrivateKey {
+    let path_str = format!("m/84'/{}'/{}'", Self::coin_type(), account);
+    let account_path: DerivationPath = path_str
+      .parse()
+      .expect("invalid derivation path for Litecoin account");
+    XPrv::derive_from_path(seed, &account_path)
+      .expect("failed to derive Litecoin account private key")
+  }
+
+  fn public_from_private(privkey: &Self::PrivateKey) -> Self::PublicKey {
+    privkey.public_key()
+  }
+
+  fn derive_addresses(_pubkey: &Self::PublicKey, count: u32) -> Vec<Self::Address> {
+    // For Litecoin, addresses are derived from child private keys, so we only
+    // have access to the account‑level xpub here. To keep the behaviour
+    // consistent with the previous implementation (which derived from seed),
+    // we treat the provided public key as the account‑level key and only
+    // construct address rows with the standard BIP84 path; the actual address
+    // string must still be computed from child keys elsewhere.
+    //
+    // For now, we just build placeholder rows based on the canonical paths,
+    // and let the existing receiver logic fill them concretely.
+    (0..count)
+      .map(|i| {
+        let path = format!("m/84'/{}'/0'/0/{}", Self::coin_type(), i);
+        AddressRow::new(path, "") // address will be filled by caller if needed
+      })
+      .collect()
+  }
+}
+
 fn encode_bech32(hrp: &str, data: &[u8]) -> Result<String, bech32::EncodeError> {
   bech32::encode::<Bech32>(Hrp::parse(hrp).unwrap(), data)
 }
@@ -31,13 +86,13 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let passphrase = prompt_passphrase()?;
   let seed = mnemonic.to_seed(&passphrase);
 
-  // 3) Derivação padrão BIP84: m/84'/coin_type'/0'
+  // 3) Derivação padrão BIP84: m/84'/coin_type'/0' usando o trait Chain.
   let account_path_str = format!("m/84'/{}'/0'", coin_type);
-  let account_path: DerivationPath = account_path_str.parse()?;
+  // let account_path: DerivationPath = account_path_str.parse()?;
   let master_xprv = XPrv::new(&seed)?;
-  let account_xprv = XPrv::derive_from_path(&seed, &account_path)?;
-  let account_xpub = account_xprv.public_key();
-  let fingerprint = bip32::XPub::from(&master_xprv).fingerprint();
+  let account_xprv = LtcChain::derive_account(&seed, 0);
+  let account_xpub = LtcChain::public_from_private(&account_xprv);
+  let fingerprint = XPub::from(&master_xprv).fingerprint();
 
   let script_type = "bip84";
   let derivation_path = account_path_str.clone();

@@ -9,7 +9,12 @@ mod wallet;
 
 use bip39::Mnemonic;
 use console::style;
-use seedctl_core::{userprofile, utils::{master_from_mnemonic, print_mnemonic}, ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase}};
+use seedctl_core::{
+  types::address::EthAddress,
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
+  userprofile,
+  utils::{master_from_mnemonic, print_mnemonic},
+};
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
@@ -62,11 +67,20 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     } else {
       rpc::get_balance(&rpc_url, &addr)
     };
-    addresses.push((path_str, addr, balance));
+    addresses.push((path_str.clone(), addr.clone(), balance));
   }
 
   let purpose = 44u32; // BIP44
   let coin = 60u32; // Ethereum coin type
+  let addr_rows: Vec<EthAddress> = addresses
+    .iter()
+    .map(|(path, addr, balance)| EthAddress {
+      path: path.clone(),
+      address: addr.clone(),
+      balance: *balance,
+    })
+    .collect();
+
   output::print_wallet_output(&output::WalletOutput {
     purpose,
     coin_type: coin,
@@ -75,6 +89,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     show_privkeys,
     addresses: &addresses,
   });
+
+  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {

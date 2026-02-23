@@ -1,6 +1,6 @@
 pub mod args;
+pub mod connection;
 pub mod meta;
-pub mod security;
 pub mod slogan;
 
 pub fn copyright_phrase() {

@@ -7,11 +7,14 @@ mod wallet;
 use bip39::Mnemonic;
 use bitcoin::key::Secp256k1;
 use console::style;
-use seedctl_core::utils::print_mnemonic;
 use seedctl_core::{
-  ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
+  types::address::BtcAddress,
+  ui::{
+    print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase,
+    table::print_table,
+  },
   userprofile,
-  utils::format_fingerprint_hex,
+  utils::{format_fingerprint_hex, print_mnemonic},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -74,6 +77,16 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     desc_change: &desc_change,
     addresses: &addresses,
   });
+
+  let addr_rows: Vec<BtcAddress> = addresses
+    .iter()
+    .map(|(path, addr)| BtcAddress {
+      path: path.clone(),
+      address: addr.clone(),
+    })
+    .collect();
+
+  print_table(&addr_rows);
 
   // Watch-only wallet
   let watch_only = true;

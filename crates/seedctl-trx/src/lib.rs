@@ -6,8 +6,9 @@ mod wallet;
 
 use bip39::Mnemonic;
 use console::style;
-use seedctl_core::ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase};
 use seedctl_core::{
+  types::address::BtcAddress,
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
 };
@@ -51,8 +52,16 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     let (child, path_str) =
       utils::derive_address_key(&master, &account_xprv, &derivation_style, i)?;
     let addr = derive::address_from_xprv(child)?;
-    addresses.push((path_str, addr));
+    addresses.push((path_str.clone(), addr.clone()));
   }
+
+  let addr_rows: Vec<BtcAddress> = addresses
+    .iter()
+    .map(|(path, addr)| BtcAddress {
+      path: path.clone(),
+      address: addr.clone(),
+    })
+    .collect();
 
   output::print_account_and_addresses(
     &hex::encode(account_xprv.to_bytes()),
@@ -61,6 +70,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addr_count,
     &addresses,
   )?;
+
+  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {

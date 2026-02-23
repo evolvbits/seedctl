@@ -1,51 +1,8 @@
+use crate::traits::address::AddressDisplay;
 use crate::utils::format_fingerprint_hex;
 use console::style;
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use std::error::Error;
-
-pub const WARNING_TEXT: &str = r#"
-***************************************************************
-  EXTREME SECURITY MODE — COLD WALLET ENVIRONMENT REQUIRED
-***************************************************************
-
-  You are about to reveal the MASTER KEYS to your funds.
-
-  If ANYONE gains access to this data, your assets can be stolen
-  instantly and irreversibly.
-
-  DO NOT CONTINUE unless ALL conditions below are true:
-
-  • This machine is permanently OFFLINE (Wi-Fi, Ethernet, Bluetooth
-    disabled or physically removed)
-  • You booted from a clean, trusted OS (live system recommended)
-  • No cameras, microphones, or screen recording devices are present
-  • No one else can see your screen
-  • This device has NEVER been infected or used for daily browsing
-  • You understand that malware can steal secrets invisibly
-  • You accept full responsibility for key exposure
-
-  STRICT RULES:
-
-  • NEVER store your mnemonic phrase, passphrase, and word indexes digitally and/or share them
-  • NEVER paste it into any website
-  • NEVER photograph it
-  • NEVER upload it
-  • NEVER reuse it on a hot wallet
-
-  LOSS WARNING:
-
-  If you lose your mnemonic or passphrase, your funds are PERMANENTLY
-  LOST.
-  No support. No recovery. No exceptions.
-
-  OPERATION PROTOCOL:
-
-  1. Generate wallet
-  2. Write mnemonic + passphrase on paper (temporary)
-  3. Transfer to a permanent offline backup (steel plate recommended)
-  4. Verify backup accuracy
-  5. DESTROY temporary paper copy
-  6. CLOSE this program immediately"#;
 
 pub fn dialoguer_theme(arrow: &str) -> ColorfulTheme {
   let mut theme = ColorfulTheme {
@@ -157,14 +114,14 @@ pub fn print_wallet_legend() {
   }
 }
 
+pub mod table;
+
 pub fn print_wallet_header(coin_name: &str) {
   print_wallet_legend();
 
   println!(
     "\n\n{}\n{}",
-    style(format!(":: Your wallet {coin_name}:"))
-      .bold()
-      .blue(),
+    style(format!(":: Your wallet {coin_name}:")).bold().blue(),
     style("-".repeat(83)).bold().blue()
   );
 }
@@ -196,39 +153,7 @@ pub fn print_mnemonic_table(title: &str, rows: &[(usize, u16, &str)]) {
   }
 }
 
-pub trait AddressRow {
-  fn path(&self) -> &str;
-  fn addr(&self) -> &str;
-  fn extra(&self) -> Option<String> {
-    None
-  }
-}
-
-impl AddressRow for (String, String) {
-  fn path(&self) -> &str {
-    &self.0
-  }
-
-  fn addr(&self) -> &str {
-    &self.1
-  }
-}
-
-impl AddressRow for (String, String, Option<f64>) {
-  fn path(&self) -> &str {
-    &self.0
-  }
-
-  fn addr(&self) -> &str {
-    &self.1
-  }
-
-  fn extra(&self) -> Option<String> {
-    self.2.map(|v| format!("{:.8}", v))
-  }
-}
-
-pub fn print_address_table<T: AddressRow>(rows: &[T]) {
+pub fn print_address_table<T: AddressDisplay>(rows: &[T]) {
   if rows.is_empty() {
     println!("(no addresses)");
     return;
@@ -341,12 +266,6 @@ pub fn print_standard_wallet<'a>(
 }
 
 pub fn print_wallet(header: &WalletHeader, rows: AddressRows) {
-  // println!(
-  //   "\n{} {}",
-  //   style("[PUBLIC] →").yellow().bold(),
-  //   style(header.title).cyan().bold()
-  // );
-
   // ───── derivation path ─────
   if let Some(path) = &header.derivation_path {
     println!(

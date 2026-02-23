@@ -5,11 +5,15 @@ mod wallet;
 
 use bip39::Mnemonic;
 use console::style;
-use seedctl_core::ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase};
-use seedctl_core::{userprofile, utils::print_mnemonic, constants::{BIP44, ETHEREUM_COIN_TYPE}};
+use seedctl_core::{
+  constants::{BIP44, ETHEREUM_COIN_TYPE},
+  types::address::BtcAddress,
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
+  userprofile,
+  utils::print_mnemonic,
+};
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
-
 
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   // 3) (Opcional) Solana: por enquanto assumimos mainnet; etiquetas podem ser ajustadas no export.
@@ -46,10 +50,18 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   for i in 0..addr_count {
     let (_, addr) = derive::keypair_and_address(&seed, i)?;
     let path = format!("m/44'/501'/{}'/0'", i);
-    addresses.push((path, addr));
+    addresses.push((path.clone(), addr.clone()));
   }
 
   let export = wallet::build_export(info, &first_pubkey_hex)?;
+
+  let addr_rows: Vec<BtcAddress> = addresses
+    .iter()
+    .map(|(path, addr)| BtcAddress {
+      path: path.clone(),
+      address: addr.clone(),
+    })
+    .collect();
 
   output::print_wallet_output(&output::WalletOutput {
     purpose: ETHEREUM_COIN_TYPE,
@@ -59,6 +71,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     show_privkeys,
     addresses: &addresses,
   });
+
+  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
