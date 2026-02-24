@@ -1,10 +1,10 @@
 mod utils;
 
-use bip39::Mnemonic;
 use dialoguer::{Input, Select};
 use seedctl_core::{
   args,
   entropy::{print_entropy_mode, resolve_final_entropy},
+  mnemonic::MnemonicGenerator,
   options::entropy_type,
   security::Security,
   ui::{dialoguer_theme, exit_confirm},
@@ -58,17 +58,17 @@ fn main() -> Result<(), Box<dyn Error>> {
           let dice_mode = entropy_type.2;
           print_entropy_mode(dice_mode);
           let final_entropy = resolve_final_entropy(entropy_type, dice_entropy);
-          Mnemonic::from_entropy(&final_entropy).expect("failed to build mnemonic from entropy")
+          MnemonicGenerator::from_entropy(&final_entropy)?
         }
         1 => loop {
           let phrase: String = Input::with_theme(&dialoguer_theme("►"))
             .with_prompt("Enter existing BIP39 seed phrase (12/24 words)")
             .interact_text()?;
 
-          match Mnemonic::parse_normalized(phrase.trim()) {
+          match MnemonicGenerator::parse(&phrase) {
             Ok(m) => break m,
-            Err(e) => {
-              eprintln!("Invalid mnemonic: {e}. Please try again.\n");
+            Err(_) => {
+              eprintln!("Invalid mnemonic phrase. Please try again.\n");
             }
           }
         },

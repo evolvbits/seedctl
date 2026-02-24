@@ -2,8 +2,7 @@ use bip39::Mnemonic;
 
 use crate::error::SeedCtlError;
 
-// TODO: Nao USADO
-// Simple wrapper responsible for generating/validating BIP39 mnemonics.
+/// Simple wrapper responsible for generating/validating BIP39 mnemonics.
 pub struct MnemonicGenerator;
 
 impl MnemonicGenerator {

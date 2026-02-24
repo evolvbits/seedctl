@@ -10,8 +10,11 @@ use crossterm::{
 };
 use rand::RngExt;
 use sha2::{Digest, Sha256};
-use std::{io::{self, Write}, time::Duration, error::Error};
-
+use std::{
+  error::Error,
+  io::{self, Write},
+  time::Duration,
+};
 
 // SHA-256 genérico sobre uma ou mais fatias de bytes.
 // Usado por dice_hash e por entropy::combine_entropy.
@@ -74,8 +77,7 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
         style("… not enough").bold().to_string()
       };
 
-      let dice_str: String =
-          dice.iter().map(|d| char::from(b'0' + *d)).collect();
+      let dice_str: String = dice.iter().map(|d| char::from(b'0' + *d)).collect();
 
       print!("\r");
       execute!(io::stdout(), Clear(ClearType::CurrentLine)).unwrap();

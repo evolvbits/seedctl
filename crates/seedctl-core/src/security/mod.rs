@@ -1,6 +1,7 @@
 mod constants;
 
 use crate::security::constants::WARNING_TEXT;
+use crossterm::event::KeyEventKind;
 use crossterm::{
   cursor, event,
   event::{Event, KeyCode, KeyModifiers},
@@ -10,7 +11,6 @@ use crossterm::{
   terminal::{ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Write};
-use crossterm::event::KeyEventKind;
 
 pub struct Security;
 
@@ -112,7 +112,6 @@ impl Security {
 
       // 3. Keys
       if let Event::Key(key_event) = event::read()? {
-
         if key_event.kind != KeyEventKind::Press {
           continue;
         }
