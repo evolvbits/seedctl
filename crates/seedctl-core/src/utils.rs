@@ -4,14 +4,14 @@ use bip39::Mnemonic;
 use console::style;
 use crossterm::{
   cursor::{Hide, Show},
-  event::{Event, KeyCode, read},
+  event::{self, Event, KeyCode, read},
   execute,
   terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 use rand::RngExt;
 use sha2::{Digest, Sha256};
-use std::error::Error;
-use std::io::{self, Write};
+use std::{io::{self, Write}, time::Duration, error::Error};
+
 
 // SHA-256 genérico sobre uma ou mais fatias de bytes.
 // Usado por dice_hash e por entropy::combine_entropy.
@@ -37,6 +37,11 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
   enable_raw_mode().unwrap();
   execute!(io::stdout(), Hide).unwrap();
 
+  // LIMPA buffer de eventos pendentes (Enter do menu anterior)
+  while event::poll(Duration::from_millis(0)).unwrap() {
+    let _ = event::read();
+  }
+
   let mut dice: Vec<u8> = Vec::new();
 
   println!("{}", style("[ Enter dice sequence (1–6) ]").yellow().bold());
@@ -51,7 +56,10 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
           dice.pop();
         }
         KeyCode::Enter => {
-          break;
+          // NÃO deixa sair se não digitou nada
+          if !dice.is_empty() {
+            break;
+          }
         }
         _ => {}
       }
@@ -66,9 +74,9 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
         style("… not enough").bold().to_string()
       };
 
-      let dice_str: String = dice.iter().map(|d| char::from(b'0' + *d)).collect();
+      let dice_str: String =
+          dice.iter().map(|d| char::from(b'0' + *d)).collect();
 
-      // Rewrite ONLY the current line
       print!("\r");
       execute!(io::stdout(), Clear(ClearType::CurrentLine)).unwrap();
 
