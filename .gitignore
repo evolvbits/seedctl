@@ -2,4 +2,6 @@
 /temp
 /.idea
 *-watch-only.json
+/.venv
+/.continue
 .aider*
