@@ -4,5 +4,4 @@
 *-watch-only.json
 /.venv*
 /.continue
-.aider*
-/IA.txt
+/.ia
