@@ -30,8 +30,6 @@ fn main() -> Result<(), Box<dyn Error>> {
       let term = console::Term::stdout();
       term.clear_screen()?;
 
-      println!("{}", style("\n:: Welcome to").bold());
-
       // Check connection internet. If connection = closed
       Connection::check();
 
@@ -40,6 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
       security.warning("I UNDERSTOOD")?;
 
       // Show slogan
+      println!("{}", style("\n:: Welcome to").bold());
       utils::slogan::slogan_view(true, true);
 
       // 0) Choose between generating a new wallet or importing an existing seed.
@@ -109,11 +108,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
   }
 
-  exit_confirm();
   copyright_phrase();
-
-  // IMPORTANT: Backup your mnemonic and private key now.
-  // Press [ENTER] to redact secrets and proceed to export options.
+  exit_confirm();
 
   Ok(())
 }
