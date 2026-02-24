@@ -10,6 +10,7 @@ use crossterm::{
   terminal::{ClearType, EnterAlternateScreen, LeaveAlternateScreen},
 };
 use std::io::{self, Write};
+use crossterm::event::KeyEventKind;
 
 pub struct Security;
 
@@ -111,6 +112,11 @@ impl Security {
 
       // 3. Keys
       if let Event::Key(key_event) = event::read()? {
+
+        if key_event.kind != KeyEventKind::Press {
+          continue;
+        }
+
         if (key_event.code == KeyCode::Char('c')
           && key_event.modifiers.contains(KeyModifiers::CONTROL))
           || key_event.code == KeyCode::Esc
