@@ -7,8 +7,7 @@ use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
   constants::{BIP44, ETHEREUM_COIN_TYPE},
-  types::address::BtcAddress,
-  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::print_mnemonic,
 };
@@ -55,14 +54,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
 
   let export = wallet::build_export(info, &first_pubkey_hex)?;
 
-  let addr_rows: Vec<BtcAddress> = addresses
-    .iter()
-    .map(|(path, addr)| BtcAddress {
-      path: path.clone(),
-      address: addr.clone(),
-    })
-    .collect();
-
   output::print_wallet_output(&output::WalletOutput {
     purpose: ETHEREUM_COIN_TYPE,
     coin_type: BIP44,
@@ -71,8 +62,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     show_privkeys,
     addresses: &addresses,
   });
-
-  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {

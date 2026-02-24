@@ -7,8 +7,7 @@ mod wallet;
 use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
-  types::address::BtcAddress,
-  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
 };
@@ -55,14 +54,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addresses.push((path_str.clone(), addr.clone()));
   }
 
-  let addr_rows: Vec<BtcAddress> = addresses
-    .iter()
-    .map(|(path, addr)| BtcAddress {
-      path: path.clone(),
-      address: addr.clone(),
-    })
-    .collect();
-
   output::print_account_and_addresses(
     &hex::encode(account_xprv.to_bytes()),
     &hex::encode(account_xpub.to_bytes()),
@@ -70,8 +61,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addr_count,
     &addresses,
   )?;
-
-  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {

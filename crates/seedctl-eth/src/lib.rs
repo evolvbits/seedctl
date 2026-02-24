@@ -11,10 +11,8 @@ use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
   constants::{BIP44, ETHEREUM_COIN_TYPE},
-  types::address::EthAddress,
   ui::{
     print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase,
-    table::print_table,
   },
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
@@ -72,16 +70,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addresses.push((path_str.clone(), addr.clone(), balance));
   }
 
-  // Struct-based view over addresses using EthAddress + AddressDisplay.
-  let addr_rows: Vec<EthAddress> = addresses
-    .iter()
-    .map(|(path, addr, balance)| EthAddress {
-      path: path.clone(),
-      address: addr.clone(),
-      balance: *balance,
-    })
-    .collect();
-
   print_wallet_output(&output::WalletOutput {
     purpose: ETHEREUM_COIN_TYPE,
     coin_type: BIP44,
@@ -90,9 +78,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     show_privkeys,
     addresses: &addresses,
   });
-
-  // Simple table using the shared core helper.
-  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {

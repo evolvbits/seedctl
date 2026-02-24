@@ -8,10 +8,8 @@ use bip39::Mnemonic;
 use bitcoin::key::Secp256k1;
 use console::style;
 use seedctl_core::{
-  types::address::BtcAddress,
   ui::{
     print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase,
-    table::print_table,
   },
   userprofile,
   utils::{format_fingerprint_hex, print_mnemonic},
@@ -78,15 +76,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addresses: &addresses,
   });
 
-  let addr_rows: Vec<BtcAddress> = addresses
-    .iter()
-    .map(|(path, addr)| BtcAddress {
-      path: path.clone(),
-      address: addr.clone(),
-    })
-    .collect();
-
-  print_table(&addr_rows);
 
   // Watch-only wallet
   let watch_only = true;

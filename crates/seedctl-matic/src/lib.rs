@@ -10,8 +10,7 @@ mod wallet;
 use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
-  types::address::EthAddress,
-  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase, table::print_table},
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
 };
@@ -72,14 +71,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
 
   let purpose = 44u32; // BIP44
   let coin = 60u32; // Ethereum coin type
-  let addr_rows: Vec<EthAddress> = addresses
-    .iter()
-    .map(|(path, addr, balance)| EthAddress {
-      path: path.clone(),
-      address: addr.clone(),
-      balance: *balance,
-    })
-    .collect();
 
   output::print_wallet_output(&output::WalletOutput {
     purpose,
@@ -90,7 +81,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addresses: &addresses,
   });
 
-  print_table(&addr_rows);
 
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
