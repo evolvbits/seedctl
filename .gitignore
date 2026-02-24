@@ -2,3 +2,4 @@
 /temp
 /.idea
 *-watch-only.json
+.aider*
