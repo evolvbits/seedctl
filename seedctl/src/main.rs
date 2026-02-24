@@ -31,11 +31,11 @@ fn main() -> Result<(), Box<dyn Error>> {
       term.clear_screen()?;
 
       // Check connection internet. If connection = closed
-      Connection::check();
+      // Connection::check();
 
       // Show warning security
-      let security = Security;
-      security.warning("I UNDERSTOOD")?;
+      // let security = Security;
+      // security.warning("I UNDERSTOOD")?;
 
       // Show slogan
       println!("{}", style("\n:: Welcome to").bold());
