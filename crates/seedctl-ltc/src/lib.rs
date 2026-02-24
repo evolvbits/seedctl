@@ -112,7 +112,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let addresses = receive_addresses(&seed, &account_path_str, network, coin_type, 10)?;
 
   print_wallet_output(
-    script_type,
     coin_type,
     &fingerprint,
     &account_xprv,
@@ -224,7 +223,7 @@ fn build_export(
   script_type: &str,
   derivation_path: &str,
   fingerprint: &[u8; 4],
-  account_xpub: &bip32::XPub,
+  account_xpub: &XPub,
 ) -> export::WalletExport {
   let network_str = match network {
     LtcNetwork::Mainnet => "litecoin",
@@ -256,13 +255,20 @@ fn build_export(
   }
 }
 fn print_wallet_output(
-  script_type: &str,
   coin_type: u32,
   fingerprint: &[u8; 4],
   account_xprv: &XPrv,
-  account_xpub: &bip32::XPub,
+  account_xpub: &XPub,
   addresses: &[(String, String)],
 ) {
+
+  println!(
+    "\n{} {} {}",
+    style("[PUBLIC] →").yellow().bold(),
+    style("Fingerprint:").cyan().bold(),
+    format_fingerprint_hex(fingerprint)
+  );
+
   println!(
     "\n{} {} m/84'/{}'/0'",
     style("[PUBLIC] → ").bold().yellow(),
@@ -271,23 +277,16 @@ fn print_wallet_output(
   );
 
   println!(
-    "\n{} {} {}",
-    style("[PUBLIC] → ").bold().yellow(),
-    style("Master fingerprint:").bold().cyan(),
-    format_fingerprint_hex(fingerprint),
+    "\n{} {}\n{}",
+    style("[SECRET] →").red().bold(),
+    style("Account Private Key:").cyan().bold(),
+    hex::encode(account_xprv.to_bytes())
   );
 
   println!(
-    "\n{} ({})\n{}",
-    style("[SECRET] → Account Private Key:").bold().red(),
-    script_type,
-    style(hex::encode(account_xprv.to_bytes())),
-  );
-
-  println!(
-    "\n{} ({})\n{}",
-    style("[PUBLIC] → Account Public Key:").bold().yellow(),
-    script_type,
+    "\n{} {}\n{}",
+    style("[PUBLIC] →").yellow().bold(),
+    style("Account Public Key:").cyan().bold(),
     hex::encode(account_xpub.to_bytes())
   );
 
