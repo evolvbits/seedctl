@@ -1,6 +1,7 @@
 use crate::utils::copyright_phrase;
 use crossterm::style::Stylize;
 use if_addrs::get_if_addrs;
+use seedctl_core::ui::exit_confirm;
 
 pub struct Connection;
 
@@ -31,6 +32,7 @@ impl Connection {
       );
 
       copyright_phrase();
+      exit_confirm();
       std::process::exit(1);
     }
   }
