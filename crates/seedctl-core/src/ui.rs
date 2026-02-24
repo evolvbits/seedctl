@@ -68,8 +68,8 @@ pub fn prompt_export_watch_only() -> Result<usize, Box<dyn Error>> {
 
 pub fn print_wallet_legend() {
   let rows = vec![
-    ("⏹", "SECRET", "DO NOT SHARE", "red"),
-    ("⏹", "PUBLIC", "WATCH-ONLY DATA", "yellow"),
+    ("red", "SECRET", "DO NOT SHARE", "red"),
+    ("yellow", "PUBLIC", "WATCH-ONLY DATA", "yellow"),
   ];
 
   let sym_w = rows.iter().map(|r| r.0.len()).max().unwrap_or(1);
@@ -79,7 +79,7 @@ pub fn print_wallet_legend() {
   println!("\n{}", style("Legend:").bold());
 
   println!(
-    "----------------------------------\n{:<sym_w$}   {:<type_w$}    {:<desc_w$}",
+    "-------------------------------------\n{:<sym_w$}      {:<type_w$}     {:<desc_w$}",
     "Color",
     "Type",
     "Description",
