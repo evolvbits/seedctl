@@ -36,12 +36,25 @@ do
 done
 
 if [ ! -s "${CONTEXT}" ]; then
-  echo "The file ${CONTEXT} is empty. Opening it in vim..."
-  $EDITOR +startinsert "${CONTEXT}"
+  cat << EOF > ${CONTEXT}
+You are an experienced programmer.
+
+Rules:
+
+- Be precise
+- Prefer functional code
+- Explain briefly
+- Avoid digressions
+- Always strive to optimize code
+- Focus on debugging
+- Explain in Brazilian Portuguese
+
+Always analyze carefully.
+EOF
 fi
 
 if [ ! -s "${PROMPT}" ]; then
-  echo "The file ${PROMPT} is empty. Opening it in vim..."
+  echo "Open file ${PROMPT}..."
   $EDITOR +startinsert "${PROMPT}"
 fi
 
