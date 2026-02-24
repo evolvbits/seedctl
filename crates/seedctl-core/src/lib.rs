@@ -1,6 +1,7 @@
 pub mod args;
 pub mod constants;
 pub mod entropy;
+pub mod evm;
 pub mod export;
 pub mod macros;
 pub mod options;

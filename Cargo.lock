@@ -1856,10 +1856,15 @@ dependencies = [
  "console",
  "crossterm",
  "dialoguer",
+ "hex",
  "if-addrs",
+ "k256",
  "rand 0.10.0",
+ "reqwest",
  "serde",
+ "serde_json",
  "sha2",
+ "sha3",
 ]
 
 [[package]]
@@ -1869,13 +1874,9 @@ dependencies = [
  "bip32",
  "bip39",
  "console",
- "dialoguer",
  "hex",
- "k256",
- "reqwest",
  "seedctl-core",
  "serde_json",
- "sha3",
 ]
 
 [[package]]
@@ -1899,18 +1900,12 @@ dependencies = [
 name = "seedctl-matic"
 version = "0.2.1"
 dependencies = [
- "anyhow",
  "bip32",
  "bip39",
  "console",
- "dialoguer",
  "hex",
- "k256",
- "reqwest",
  "seedctl-core",
- "serde",
  "serde_json",
- "sha3",
 ]
 
 [[package]]

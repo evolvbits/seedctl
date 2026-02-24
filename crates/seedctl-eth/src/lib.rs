@@ -11,9 +11,7 @@ use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
   constants::{BIP44, ETHEREUM_COIN_TYPE},
-  ui::{
-    print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase,
-  },
+  ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
 };
@@ -42,6 +40,11 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export = wallet::build_export(info, &base_path, account_xpub.clone())?;
 
   let rpc_url = prompts::prompt_rpc_url()?;
+  let rpc_client = if rpc_url.is_empty() {
+    None
+  } else {
+    Some(rpc::RpcClient::new(rpc_url.clone()))
+  };
   // let show_privkeys = prompts::prompt_show_privkeys()?; // It asks if you want to show the private key.
   let show_privkeys = true;
 
@@ -62,17 +65,15 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     let (child, path_str) =
       utils::derive_address_key(&master, &account_xprv, &derivation_style, i)?;
     let addr = derive::address_from_xprv(child)?;
-    let balance = if rpc_url.is_empty() {
-      None
-    } else {
-      rpc::get_balance(&rpc_url, &addr)
-    };
+    let balance = rpc_client
+      .as_ref()
+      .and_then(|client| client.get_balance(&addr));
     addresses.push((path_str.clone(), addr.clone(), balance));
   }
 
   print_wallet_output(&output::WalletOutput {
-    purpose: ETHEREUM_COIN_TYPE,
-    coin_type: BIP44,
+    purpose: BIP44,
+    coin_type: ETHEREUM_COIN_TYPE,
     account_xprv: &hex::encode(account_xprv.to_bytes()),
     account_xpub: &hex::encode(account_xpub.to_bytes()),
     show_privkeys,

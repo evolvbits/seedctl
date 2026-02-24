@@ -1,4 +1,3 @@
-//! Polygon
 mod derive;
 mod output;
 mod prompts;
@@ -10,6 +9,7 @@ mod wallet;
 use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
+  constants::{BIP44, ETHEREUM_COIN_TYPE},
   ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{master_from_mnemonic, print_mnemonic},
@@ -18,13 +18,9 @@ use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
-  // 3) (Opcional) Polygon (EVM) usa a mesma estrutura de chaves do Ethereum.
-
-  // 4) Passphrase opcional
   let passphrase = prompt_passphrase()?;
   let master = master_from_mnemonic(mnemonic, &passphrase)?;
 
-  // 5) Derivation mode/style
   let mode = prompts::select_derivation_mode()?;
   if mode == 1 {
     scanner::scan_common_paths(master)?;
@@ -41,7 +37,11 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export = wallet::build_export(info, &base_path, account_xpub.clone())?;
 
   let rpc_url = prompts::prompt_rpc_url()?;
-  // It asks if you want to show the private key (mantemos true por padrão, como no ETH).
+  let rpc_client = if rpc_url.is_empty() {
+    None
+  } else {
+    Some(rpc::RpcClient::new(rpc_url.clone()))
+  };
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -61,27 +61,20 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     let (child, path_str) =
       utils::derive_address_key(&master, &account_xprv, &derivation_style, i)?;
     let addr = derive::address_from_xprv(child)?;
-    let balance = if rpc_url.is_empty() {
-      None
-    } else {
-      rpc::get_balance(&rpc_url, &addr)
-    };
+    let balance = rpc_client
+      .as_ref()
+      .and_then(|client| client.get_balance(&addr));
     addresses.push((path_str.clone(), addr.clone(), balance));
   }
 
-  let purpose = 44u32; // BIP44
-  let coin = 60u32; // Ethereum coin type
-
   output::print_wallet_output(&output::WalletOutput {
-    purpose,
-    coin_type: coin,
+    purpose: BIP44,
+    coin_type: ETHEREUM_COIN_TYPE,
     account_xprv: &hex::encode(account_xprv.to_bytes()),
     account_xpub: &hex::encode(account_xpub.to_bytes()),
     show_privkeys,
     addresses: &addresses,
   });
-
-
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
     let xpub_part = &export.keys.account_xpub[0..7];
