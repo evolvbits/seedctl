@@ -15,6 +15,7 @@ console.workspace = true
 dialoguer.workspace = true
 serde_json.workspace = true
 sha2.workspace = true
+reqwest = { version = "0.13.2", features = ["blocking", "json"] }
 pbkdf2 = "0.12.2"
 ed25519-bip32 = "0.4.1"
 cryptoxide = "0.5.1"
