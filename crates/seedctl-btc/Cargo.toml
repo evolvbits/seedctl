@@ -13,5 +13,4 @@ bip39 = "2"
 dialoguer.workspace = true
 console.workspace = true
 serde_json.workspace = true
-
-
+reqwest.workspace = true

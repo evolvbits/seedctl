@@ -10,7 +10,7 @@ rust-version.workspace = true
 [dependencies]
 # Crates do projeto
 seedctl-core.workspace = true
-bip32 = { version = "0.5", features = ["secp256k1"] }
+bip32.workspace = true
 
 # Dependências próprias
 hex.workspace = true
