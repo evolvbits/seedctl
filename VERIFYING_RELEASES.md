@@ -10,8 +10,8 @@ These steps are designed to match exactly how releases are produced by the curre
 
 For every tagged release (`vX.Y.Z`), the GitHub Release contains:
 
-* `seedctl` — Linux binary
-* `seedctl.exe` — Windows binary
+* `seedctl-<VERSION>-linux-x86_64` — Linux binary
+* `seedctl-<VERSION>-windows-x86_64.exe` — Windows binary
 * `SHA256SUMS` — SHA-256 checksums for all binaries
 * `SHA256SUMS.asc` — GPG signature of `SHA256SUMS`
 
@@ -54,9 +54,9 @@ Example:
 
 ```bash
 ls
-seedctl-<VERSION>-linux-x86_64 
+seedctl-<VERSION>-linux-x86_64
 seedctl-<VERSION>-windows-x86_64.exe
-seedctl-<VERSION>-linux-x86_64.AppImage 
+seedctl-<VERSION>-linux-x86_64.AppImage
 SHA256SUMS
 SHA256SUMS.asc
 ```

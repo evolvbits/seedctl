@@ -1,5 +1,8 @@
 # Security Policy
 
+For legal/safety terms, see the full disclaimer:
+[`DISCLAIMER.md`](./DISCLAIMER.md)
+
 ## Supported Versions
 
 Only the latest version of this project is supported.
@@ -38,6 +41,13 @@ The user is fully responsible for:
 - Environment security
 - Key storage
 - Backup strategy
-- Understanding key management and derivation paths for Bitcoin, Ethereum, Tron and Solana
+- Understanding key management and derivation paths for Bitcoin, Ethereum, BNB Smart Chain, XRP Ledger, Tron, Solana, Cardano and Monero
 
 Use at your own risk.
+
+## Relationship to Disclaimer
+
+`SECURITY.md` defines the security policy, assumptions, and vulnerability reporting process.
+`DISCLAIMER.md` defines risk acceptance, warranty exclusion, and limitation of liability.
+
+Both documents are complementary and should be kept consistent.

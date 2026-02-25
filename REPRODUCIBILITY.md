@@ -1,222 +1,203 @@
 # Reproducibility & Deterministic Wallet Recovery
 
-This document explains how to **deterministically reproduce wallets** generated with **SeedCTL** – including **Bitcoin, Ethereum, Tron and Solana** – step by step.
+This document explains how to deterministically reproduce wallets generated with SeedCTL.
 
-The goal is to ensure that **anyone**, at any point in the future, can reconstruct **the exact same wallet** using the same inputs — without trusting this software, the binary, or its author.
+Current networks/coins in the project:
+
+- Bitcoin (BTC)
+- Ethereum (ETH)
+- BNB Smart Chain (BNB)
+- XRP Ledger (XRP)
+- Tron (TRX)
+- Solana (SOL)
+- Litecoin (LTC)
+- Polygon (POL/MATIC)
+- Cardano (ADA)
+- Monero (XMR)
+
+The objective is to let anyone reconstruct the same wallet data from the same inputs, without trusting a specific machine or session.
 
 ---
 
 ## Core Principle
 
-Wallet generation is **fully deterministic** given the following parameters:
+A wallet is reproducible only when all relevant inputs are identical:
 
-1. Mnemonic size (12 or 24 words)
-2. Dice sequence (manual or auto-generated)
-3. Optional passphrase
-4. Selected **network/coin** (Bitcoin, Ethereum, Tron, Solana)
-5. Selected **derivation path** for that network (e.g. Bitcoin BIP84, Ethereum BIP44, Tron BIP44, Solana BIP44)
+1. Mnemonic source (generated in SeedCTL or imported BIP39 phrase)
+2. Mnemonic size (12 or 24 words), when generated in SeedCTL
+3. Entropy mode (Hybrid or Deterministic), when generated in SeedCTL
+4. Dice sequence (if used)
+5. BIP39 passphrase (exactly)
+6. Selected network/coin
+7. Selected derivation mode/style/path for that coin
 
-If **all inputs are identical**, the resulting wallet **will be identical**.
+If any item changes, outputs change.
 
 ---
 
-## Dice Entropy (Manual Mode)
+## Entropy Model (As Implemented)
 
-When using **manual dice input**, the dice sequence becomes a **human-verifiable source of entropy**.
+When creating a new mnemonic in SeedCTL, the entropy pipeline is:
 
-Rules:
+- `dice_entropy = SHA256(dice_sequence_bytes)`
 
-* Each character must be a number from **1 to 6**
-* No separators (spaces, commas, etc.)
-
-Example:
+### Deterministic mode (manual dice)
 
 ```bash
-314626515245366152436615243661524366
+entropy_final = truncate_bits(dice_entropy, mnemonic_bits)
 ```
 
-Properties:
+- No system randomness is added.
+- Reproducible if the same dice sequence and mnemonic size are used.
 
-* Human-generated
-* Verifiable by sight
-* Reusable
-* Independent from system RNG
-
----
-
-## Hybrid Entropy Model
-
-`seedctl` uses a **hybrid entropy model** internally:
+### Hybrid mode (auto dice + system RNG)
 
 ```bash
-entropy_final = SHA256(dice_entropy || hex_entropy)
+entropy_final = truncate_bits(SHA256(dice_entropy || system_entropy_32B), mnemonic_bits)
 ```
 
-Where:
+- Adds system RNG.
+- Intended for fresh wallet generation, not deterministic ceremony replay.
 
-* `dice_entropy` is derived from the dice sequence
-* `hex_entropy` is deterministic in manual mode and randomly generated in auto mode
-
-### Security Properties
-
-* Manual dice mode is **fully reproducible**
-* No hidden randomness is introduced
-* Auto mode intentionally introduces non-reproducible entropy
-
-This design allows the same software to be used for:
-
-* Secure wallet generation
-* Deterministic wallet recovery
+Important:
+- If you need strict reproducibility, use deterministic/manual dice mode or import an existing mnemonic.
 
 ---
 
-## Step-by-Step Reproduction Example
+## What You Must Record for Future Recovery
 
-### Parameters (Bitcoin example)
+For a deterministic ceremony, record at minimum:
 
-* Mnemonic size: **12 words**
-* Dice mode: **Manual**
-* Dice sequence: 314626515245366152436615243661524366
-* Passphrase: *(empty)*
-* Coin / Network: **Bitcoin – Mainnet**
+- mnemonic size (12/24)
+- entropy mode
+- full dice sequence (if used)
+- passphrase (or explicit "empty")
+- selected coin/network
+- selected derivation mode/style/path
+- address index range generated (e.g., 0..9)
 
----
+For imported wallets, record:
 
-### Step 1 — Run offline
-
-```bash
-./seedctl
-```
-
-Recommended environment:
-
-* Offline computer
-* Air-gapped system
-* Tails OS or similar
+- full mnemonic words
+- passphrase
+- coin/network
+- derivation mode/style/path
 
 ---
 
-### Step 2 — Select mnemonic size
+## Coin-Specific Reproducibility Parameters
 
-Choose:
+### Bitcoin (BTC)
 
-```bash
-12 words (128 bits)
-```
+- Networks: Mainnet and Testnet
+- Coin type: Mainnet `0`, Testnet `1`
+- Derivation purpose selectable: BIP84, BIP49, BIP44
+- Account path (BIP84): `m/84'/coin_type'/0'` (native SegWit)
+- Account path (BIP49): `m/49'/coin_type'/0'` (nested SegWit)
+- Account path (BIP44): `m/44'/coin_type'/0'` (legacy)
+- Receive path pattern: `.../0/index`
 
----
+To reproduce BTC exactly, you must keep both network and purpose identical.
 
-### Step 3 — Dice mode
+### Ethereum (ETH), BNB Smart Chain (BNB), Polygon (POL/MATIC)
 
-Choose:
+These three use the shared EVM derivation engine.
 
-```bash
-Manual (inform sequence)
-```
+- Derivation mode: generate addresses, or scan common derivation paths
+- Derivation style (Standard): base `m/44'/60'/0'/0`, addresses at `/index`
+- Derivation style (Ledger): addresses at `m/44'/60'/index'/0/0`
+- Derivation style (Custom): supports `{index}` placeholder; if path ends with `/`, index is appended
 
-Paste the exact dice sequence.
+For deterministic recovery, use the same style and exact custom template (if any).
 
----
+### XRP Ledger (XRP)
 
-### Step 4 — Visual confirmation
+- Networks: Mainnet and Testnet
+- Base path: `m/44'/144'/0'/0`
+- Address paths: `m/44'/144'/0'/0/index`
+- Address format: XRPL classic address (`r...`)
 
-The program will display:
+### Tron (TRX)
 
-```bash
-DICE USED (34 numbers): 314626515245366152436615243661524366
-```
+- Current flow: mainnet-focused (no explicit network selector in current UX)
+- Derivation style (Standard): `m/44'/195'/0'/0/index`
+- Derivation style (Ledger): `m/44'/195'/0'/index'/0/0`
+- Derivation style (Custom): custom path supported
+- Address format: Base58Check with Tron prefix (`T...`)
 
-Verify carefully before confirming.
+### Solana (SOL)
 
----
+- Current flow: mainnet-focused (no explicit network selector in current UX)
+- Path: `m/44'/501'/index'/0'`
+- Address format: base58 Ed25519 public key
 
-### Step 5 — Network / coin
+### Litecoin (LTC)
 
-Choose:
+- Networks: Mainnet and Testnet
+- Coin type: Mainnet `2`, Testnet `1`
+- Account path: `m/84'/coin_type'/0'`
+- Receive paths: `m/84'/coin_type'/0'/0/index`
+- Address format: Mainnet HRP `ltc...`, Testnet HRP `tltc...`
 
-```bash
-Bitcoin (Mainnet)
-```
+### Cardano (ADA)
 
-> For other coins, select the corresponding option (Ethereum, Tron, Solana)
-> and use the appropriate derivation path for that network.
+- Networks: Mainnet and Testnet
+- Scheme: CIP-1852 / Shelley
+- Account currently fixed to `0`
+- Account path: `m/1852'/1815'/0'`
+- Payment paths: `m/1852'/1815'/0'/0/index`
+- Address format: Mainnet `addr...`, Testnet `addr_test...`
 
----
+### Monero (XMR)
 
-### Step 6 — Passphrase
+- Networks: Mainnet and Testnet
+- Seed input: derived from BIP39 seed bytes + passphrase
+- Address indexing model used by project: index `0` = standard; index `>=1` = subaddress (`major=0, minor=index`)
+- Displayed derivation label: `xmr(major=0,minor=index)`
 
-Press **Enter** for an empty passphrase or enter the **exact same passphrase** used originally.
-
-The passphrase is part of the seed. Any change results in a different wallet.
-
----
-
-## Output Verification
-
-The following outputs must match **exactly**:
-
-* Mnemonic words
-* Word indexes (BIP39, base-1)
-* Derivation path for the selected network
-* Extended keys (e.g. ZPRV / ZPUB for Bitcoin, account xpub for other coins)
-* Generated addresses
-
-If all values match, the wallet has been successfully reproduced **for that specific network and path**.
-
-No hashes, binaries or signatures are required for wallet reproduction.
-
----
-
-## Wallet Recovery in Other Software
-
-### Bitcoin
-
-The Bitcoin wallet can be imported into:
-
-* Sparrow Wallet
-* Electrum
-* BlueWallet
-* Bitcoin Core
-
-Use:
-
-* BIP39 mnemonic
-* Same passphrase
-* Derivation path:
-
-```bash
-  m/84'/0'/0'
-```
-
-### Ethereum / Tron / Solana
-
-For other networks, the same BIP39 mnemonic and passphrase can be reused in
-wallets that support the corresponding BIP44 paths, for example:
-
-* **Ethereum** – MetaMask, Ledger Live, etc. (`m/44'/60'/0'/0/x` or Ledger paths)
-* **Tron** – TronLink and similar (`m/44'/195'/0'/0/x`)
-* **Solana** – Phantom, Solana CLI (`m/44'/501'/index'/0'`)
-
-Always ensure the **derivation path** in the external wallet matches the one used in `seedctl`.
+Monero in this project is deterministic for the same mnemonic, passphrase, network, and index.
 
 ---
 
-## Common Errors
+## Practical Recovery Flow
 
-* Using auto mode instead of manual dice (when you expect full reproducibility)
-* Incorrect dice sequence
-* Forgotten passphrase
-* Wrong network / coin (e.g. Bitcoin Mainnet vs Testnet, Ethereum vs Tron vs Solana)
-* Different derivation path for the chosen network
-
-Any of these will generate a **different wallet**.
+1. Run SeedCTL in a trusted offline environment.
+2. Choose `Create new wallet` for ceremony replay using the same entropy inputs, or `Import existing wallet` if you already have the mnemonic.
+3. Enter/select exactly the same passphrase.
+4. Select the same coin/network.
+5. Select the same derivation mode/style/path.
+6. Generate the same address index range.
+7. Compare outputs.
 
 ---
 
-## Final Notes
+## Output Verification Checklist
 
-Reproducibility is a **security feature**, not a limitation.
+For a successful reproduction, compare:
 
-If you can reproduce the wallet from scratch, you do **not need to trust this software**.
+- mnemonic words and order
+- BIP39 word indexes
+- displayed derivation path(s)
+- account-level extended/public keys (where applicable)
+- generated addresses for the same indices
 
-That is the point.
+If all of the above match, reproduction is successful for that coin/path configuration.
+
+---
+
+## Common Causes of Mismatch
+
+- Using Hybrid mode when expecting deterministic replay
+- Different dice sequence
+- Different mnemonic size
+- Different passphrase (including spacing/case)
+- Wrong network (e.g., mainnet vs testnet)
+- Different derivation style (standard vs ledger vs custom)
+- Different custom path template
+- Comparing different address indices
+
+---
+
+## Final Note
+
+Reproducibility is a security control: if you can regenerate wallet outputs from documented inputs, you do not need to trust a single runtime session.

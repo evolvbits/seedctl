@@ -24,4 +24,10 @@
 - Print Fingerprint
 - Option of: Native SegWit (BIP84), Nested SegWit (BIP49) and Legacy (BIP44) for Bitcoin
 - Adding an option to export watch-only wallet
-- Adding altcoins (Ethereum, Solana, Tron, Litecoin, Polygon)
+- Adding addresses coin: Ethereum, Solana, Tron, Litecoin, Polygon
+
+# [0.2.1] – 2026-02-26
+
+- Adding addresses coin: Cardano, Monero, BNB, XRP
+- Improving the code structure
+- Improving documentation: DISCLAIMER.md, README[ptbr].md, REPRODUCIBILITY[ptbr].md, VERIFYING_RELEASES.md and SECURITY.md

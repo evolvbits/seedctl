@@ -12,7 +12,7 @@
 
 🇺🇸 [**Read in English**](README.md)
 
-**SeedCTL** é um gerador de carteiras **multichain** (‘Bitcoin’, Ethereum, Tron e Solana), **determinístico, auditável e focado em segurança**, escrito em [**Rust**](https://rust-lang.org/) para uso **offline**.
+**SeedCTL** é um gerador de carteiras **multichain** (‘Bitcoin’, Ethereum, BNB Smart Chain, XRP Ledger, Tron, Solana, Cardano e Monero), **determinístico, auditável e focado em segurança**, escrito em [**Rust**](https://rust-lang.org/) para uso **offline**.
 
 Este programa permite gerar (ou importar) uma seed BIP39 e derivar carteiras para múltiplas redes a partir de **dados físicos (dado/dice) 🎲** e/ou **entropia do sistema**, produzindo:
 
@@ -20,15 +20,23 @@ Este programa permite gerar (ou importar) uma seed BIP39 e derivar carteiras par
 - Suporte a **passphrase opcional**
 - Derivação **BIP84 (Native SegWit – bc1)** para ‘Bitcoin’ (m/84'/0'/0' e m/84'/1'/0')
 - Derivação **BIP44 padrão Ethereum** (m/44'/60'/0'/0/x) e estilo **Ledger** (m/44'/60'/x'/0/0)
+- Derivação **BIP44 para BNB Smart Chain** (m/44'/60'/0'/0/x) e estilo **Ledger** (m/44'/60'/x'/0/0)
+- Derivação **BIP44 XRP Ledger** (m/44'/144'/0'/0/x)
 - Derivação **BIP44 Tron** (m/44'/195'/0'/0/x)
 - Derivação **BIP44 Solana** (m/44'/501'/index'/0')
-- Suporte a **Mainnet e Testnet** (Bitcoin; outras redes focadas em mainnet por enquanto)
+- Derivação **CIP-1852 Cardano (Shelley)** (m/1852'/1815'/account'/0/index)
+- Derivação **Monero (subaddress)** com `xmr(major=0,minor=index)` e key-origin `m/44'/128'/0'/0/0`
+- Suporte a **Mainnet e Testnet** (Bitcoin, XRP, Cardano e Monero)
 - Exibição de [**Word Indexes BIP39**](https://github.com/bitcoin/bips/blob/master/bip-0039/english.txt)
 - Geração de **endereços determinísticos** para:
   - **Bitcoin**: endereços `bc1...` / `tb1...` (Native SegWit)
   - **Ethereum**: endereços `0x...` (checksum EIP‑55)
+  - **BNB Smart Chain**: endereços `0x...` (checksum EIP‑55)
+  - **XRP Ledger**: endereços clássicos `r...`
   - **Tron**: endereços `T...` (base58check com prefixo 0x41)
   - **Solana**: endereços base58 de chave pública Ed25519
+  - **Cardano**: endereços `addr...` / `addr_test...` (Shelley base address)
+  - **Monero**: endereços base58 (standard/subaddress)
 
 O objetivo principal é permitir **geração segura, verificável e ‘offline’** de seeds BIP39 reutilizáveis em múltiplas moedas, com alto nível de paranoia e controle total do processo.
 
@@ -80,15 +88,19 @@ Indicadores de manutenção e atividade para o repositório canonical do **GitHu
 - Confirmação visual da sequência de dados
 - Passphrase opcional (BIP39)
 - Menu inicial com **Generate new wallet** e **Import existing wallet** (seed já existente)
-- Seleção de rede: **Bitcoin, Ethereum, Tron, Solana**
-- Suporte a Mainnet e Testnet (Bitcoin)
-- Derivação BIP84 (Bitcoin), BIP44 (Ethereum, Tron, Solana)
+- Seleção de rede: **Bitcoin, Ethereum, BNB Smart Chain, XRP Ledger, Tron, Solana, Cardano e Monero**
+- Suporte a Mainnet e Testnet (Bitcoin, XRP, Cardano e Monero)
+- Derivação BIP84 (Bitcoin), BIP44 (Ethereum, BNB, XRP, Tron, Solana), CIP-1852 (Cardano), subaddress (Monero)
 - Exibição dos **Word Indexes** (base 1, formato `0001`)
 - Geração de endereços:
   - `bc1` / `tb1` (Bitcoin)
   - `0x...` (Ethereum)
+  - `0x...` (BNB Smart Chain)
+  - `r...` (XRP Ledger)
   - `T...` (Tron)
   - base58 (Solana)
+  - `addr...` / `addr_test...` (Cardano)
+  - base58 (Monero)
 
 ---
 
@@ -182,11 +194,25 @@ Cada palavra do mnemonic é acompanhada do seu índice na wordlist BIP39:
   - Padrão (MetaMask e afins): `m/44'/60'/0'/0/x`
   - Ledger style: `m/44'/60'/x'/0/0`
 
+- **BNB Smart Chain**
+  - Padrão (EVM): `m/44'/60'/0'/0/x`
+  - Ledger style: `m/44'/60'/x'/0/0`
+
+- **XRP Ledger**
+  - Padrão BIP44: `m/44'/144'/0'/0/x`
+
 - **Tron**
   - Padrão BIP44: `m/44'/195'/0'/0/x`
 
 - **Solana**
   - Padrão BIP44: `m/44'/501'/index'/0'`
+
+- **Cardano**
+  - Padrão CIP-1852 (Shelley): `m/1852'/1815'/account'/0/index`
+
+- **Monero**
+  - Exibição de endereços/subendereços: `xmr(major=0,minor=index)`
+  - Key-origin de export/watch-only: `m/44'/128'/0'/0/0`
 
 ---
 
@@ -206,6 +232,18 @@ Geração de endereços determinísticos a partir dos paths escolhidos:
   m/44'/60'/0'/0/0 → 0x...
   ```
 
+- **BNB Smart Chain**
+
+  ```bash
+  m/44'/60'/0'/0/0 → 0x...
+  ```
+
+- **XRP Ledger**
+
+  ```bash
+  m/44'/144'/0'/0/0 → r...
+  ```
+
 - **Tron**
 
   ```bash
@@ -216,6 +254,18 @@ Geração de endereços determinísticos a partir dos paths escolhidos:
 
   ```bash
   m/44'/501'/0'/0' (index 0) → <endereço base58>
+  ```
+
+- **Cardano**
+
+  ```bash
+  m/1852'/1815'/0'/0/0 → addr... / addr_test...
+  ```
+
+- **Monero**
+
+  ```bash
+  xmr(major=0,minor=0) → 4... (standard) / xmr(major=0,minor=1) → 8... (subaddress)
   ```
 
 ---
@@ -234,6 +284,17 @@ Geração de endereços determinísticos a partir dos paths escolhidos:
   - Ledger Live (via paths padrão / Ledger)
   - Outras wallets BIP39/BIP44 com `m/44'/60'/0'/0/x`
 
+- **BNB Smart Chain**
+  - MetaMask (rede BSC)
+  - Trust Wallet
+  - Rabby
+  - Outras wallets EVM com `m/44'/60'/0'/0/x`
+
+- **XRP Ledger**
+  - Xaman (XUMM)
+  - Ledger Live
+  - Outras wallets XRPL com `m/44'/144'/0'/0/x`
+
 - **Tron**
   - TronLink e carteiras que usem `m/44'/195'/0'/0/x`
 
@@ -242,6 +303,18 @@ Geração de endereços determinísticos a partir dos paths escolhidos:
   - Solana CLI / solana-keygen
   - Outras wallets que usem `m/44'/501'/index'/0'`
 
+- **Cardano**
+  - Eternl
+  - Yoroi
+  - Lace
+  - Outras wallets Shelley/CIP-1852 com `m/1852'/1815'/account'/0/index`
+
+- **Monero**
+  - Monero GUI Wallet
+  - Monero CLI (`monero-wallet-cli`)
+  - Feather Wallet
+  - Carteiras compatíveis com endereços standard/subaddress
+
 ---
 
 ## Aviso Legal
@@ -249,6 +322,9 @@ Geração de endereços determinísticos a partir dos paths escolhidos:
 Este ‘software’ é fornecido “como está”, sem garantias.
 
 Você é 100% responsável pelo uso, armazenamento e segurança das chaves geradas.
+
+> Este software pode expor chaves privadas de forma irreversível.
+> Use somente se você compreender completamente o gerenciamento de chaves.
 
 ---
 
@@ -329,4 +405,4 @@ https://github.com/sponsors/williamcanin
 
 ---
 
-Este projeto foi construído com um forte foco em **segurança, transparência e verificabilidade**, visando dar aos utilizadores controle total sobre as suas chaves e derivations em Bitcoin, Ethereum, Tron e Solana.
+Este projeto foi construído com um forte foco em **segurança, transparência e verificabilidade**, visando dar aos utilizadores controle total sobre as suas chaves e derivations em Bitcoin, Ethereum, BNB Smart Chain, XRP Ledger, Tron, Solana, Cardano e Monero.
