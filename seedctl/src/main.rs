@@ -81,6 +81,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         .items([
           "Bitcoin",
           "Ethereum (ETH + ERC20 tokens)",
+          "BNB (BNB Smart Chain, EVM)",
+          "XRP (XRP Ledger)",
           "Tron (TRX + TRC20 tokens)",
           "Solana (SOL + SPL tokens)",
           "Litecoin (LTC)",
@@ -97,12 +99,14 @@ fn main() -> Result<(), Box<dyn Error>> {
       match network {
         0 => seedctl_btc::run("Bitcoin (BTC)", &mnemonic, info)?,
         1 => seedctl_eth::run("Ethereum (ETH)", &mnemonic, info)?,
-        2 => seedctl_trx::run("TRON (TRX)", &mnemonic, info)?,
-        3 => seedctl_sol::run("Solana (SOL)", &mnemonic, info)?,
-        4 => seedctl_ltc::run("Litecoin (LTC)", &mnemonic, info)?,
-        5 => seedctl_matic::run("Polygon (POL)", &mnemonic, info)?,
-        6 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
-        7 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
+        2 => seedctl_bnb::run("BNB Smart Chain (BNB)", &mnemonic, info)?,
+        3 => seedctl_xrp::run("XRP Ledger (XRP)", &mnemonic, info)?,
+        4 => seedctl_trx::run("TRON (TRX)", &mnemonic, info)?,
+        5 => seedctl_sol::run("Solana (SOL)", &mnemonic, info)?,
+        6 => seedctl_ltc::run("Litecoin (LTC)", &mnemonic, info)?,
+        7 => seedctl_matic::run("Polygon (POL)", &mnemonic, info)?,
+        8 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
+        9 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
         _ => unreachable!(),
       };
     }
