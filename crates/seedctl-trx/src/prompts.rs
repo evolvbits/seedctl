@@ -1,5 +1,5 @@
 use dialoguer::{Input, Select};
-use seedctl_core::ui::dialoguer_theme;
+use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
 use crate::utils::DerivationStyle;
@@ -14,6 +14,18 @@ pub fn prompt_address_count() -> Result<u32, Box<dyn Error>> {
 
 pub fn select_derivation_style() -> Result<DerivationStyle, Box<dyn Error>> {
   crate::utils::select_derivation_style()
+}
+
+pub fn prompt_rpc_url() -> Result<String, Box<dyn Error>> {
+  if !RPC_URL_ENABLE {
+    return Ok(String::new());
+  }
+
+  let s: String = Input::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Tron node URL (enter to skip balance check)")
+    .allow_empty(true)
+    .interact_text()?;
+  Ok(s)
 }
 
 #[allow(dead_code)]

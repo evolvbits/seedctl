@@ -1,6 +1,7 @@
 mod derive;
 mod output;
 mod prompts;
+mod rpc;
 mod wallet;
 
 use bip39::Mnemonic;
@@ -27,13 +28,26 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     exit(0);
   }
 
+  let rpc_url = prompts::prompt_rpc_url()?;
+
   print_wallet_header(coin_name);
   print_mnemonic(
     mnemonic,
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
-  let addresses = derive::receive_addresses(&account_xprv, network, coin_type, 10)?;
+  let receive_addresses = derive::receive_addresses(&account_xprv, network, coin_type, 10)?;
+  let mut addresses: Vec<(String, String, Option<f64>)> =
+    Vec::with_capacity(receive_addresses.len());
+
+  for (path, addr) in receive_addresses {
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path, addr, balance));
+  }
 
   output::print_wallet_output(&output::WalletOutput {
     coin_type,

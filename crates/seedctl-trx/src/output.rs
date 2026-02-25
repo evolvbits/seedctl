@@ -6,7 +6,7 @@ pub fn print_account_and_addresses(
   account_xpub_hex: &str,
   show_privkeys: bool,
   addr_count: u32,
-  addresses: &[(String, String)],
+  addresses: &[(String, String, Option<f64>)],
 ) -> Result<(), Box<dyn Error>> {
   if show_privkeys {
     println!(
@@ -32,8 +32,12 @@ pub fn print_account_and_addresses(
       .cyan()
   );
 
-  for (path, addr) in addresses {
-    println!("{} → {}", path, addr);
+  for (path, addr, balance) in addresses {
+    if let Some(bal) = balance {
+      println!("{} → {}   [balance: {:.6} TRX]", path, addr, bal);
+    } else {
+      println!("{} → {}", path, addr);
+    }
   }
 
   Ok(())

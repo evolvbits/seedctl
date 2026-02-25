@@ -1,6 +1,7 @@
 mod derive;
 mod output;
 mod prompts;
+mod rpc;
 mod wallet;
 
 use bip39::Mnemonic;
@@ -23,6 +24,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let account = derive::derive_account(&master, account_index);
 
   let addr_count = prompts::prompt_address_count()?;
+  let rpc_url = prompts::prompt_rpc_url()?;
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -40,10 +42,15 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let first_secret_hex = hex::encode(first_payment_xprv.as_ref());
   let account_xpub_hex = hex::encode(account.account_xpub.as_ref());
 
-  let mut addresses: Vec<(String, String)> = Vec::with_capacity(addr_count as usize);
+  let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
   for i in 0..addr_count {
     let (_, address) = derive::keypair_and_address(&account, i, network)?;
-    addresses.push((derive::payment_path(account_index, i), address));
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &address)
+    };
+    addresses.push((derive::payment_path(account_index, i), address, balance));
   }
 
   output::print_wallet_output(&output::WalletOutput {

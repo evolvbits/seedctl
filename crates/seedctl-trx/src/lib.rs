@@ -1,6 +1,7 @@
 mod derive;
 mod output;
 mod prompts;
+mod rpc;
 mod utils;
 mod wallet;
 
@@ -25,6 +26,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   // 5) Derivation path (Standard / Ledger / Custom)
   let addr_count = prompts::prompt_address_count()?;
   let derivation_style = prompts::select_derivation_style()?;
+  let rpc_url = prompts::prompt_rpc_url()?;
   let base_path = utils::style_to_string(&derivation_style);
 
   // 6) Geração de chaves e endereços
@@ -46,12 +48,17 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
-  let mut addresses: Vec<(String, String)> = Vec::with_capacity(addr_count as usize);
+  let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
   for i in 0..addr_count {
     let (child, path_str) =
       utils::derive_address_key(&master, &account_xprv, &derivation_style, i)?;
     let addr = derive::address_from_xprv(child)?;
-    addresses.push((path_str.clone(), addr.clone()));
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path_str.clone(), addr.clone(), balance));
   }
 
   output::print_account_and_addresses(

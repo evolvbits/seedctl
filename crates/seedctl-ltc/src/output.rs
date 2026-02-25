@@ -5,7 +5,7 @@ pub struct WalletOutput<'a> {
   pub fingerprint: &'a [u8; 4],
   pub account_xprv: &'a str,
   pub account_xpub: &'a str,
-  pub addresses: &'a [(String, String)],
+  pub addresses: &'a [(String, String, Option<f64>)],
 }
 
 pub fn print_wallet_output(output: &WalletOutput<'_>) {
@@ -16,7 +16,7 @@ pub fn print_wallet_output(output: &WalletOutput<'_>) {
     Some(output.fingerprint),
     Some(output.account_xprv),
     output.account_xpub,
-    AddressRows::Basic(output.addresses),
+    AddressRows::WithBalance(output.addresses),
     vec![
       ("Output Descriptor (receive):", "ltc-bip84"),
       ("Output Descriptor (change):", "ltc-bip84"),

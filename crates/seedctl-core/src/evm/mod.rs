@@ -31,6 +31,13 @@ const POLYGON_SCAN_PATHS: &[&str] = &[
   "m/44'/60'/1'/0/0",
 ];
 
+const BNB_SCAN_PATHS: &[&str] = &[
+  "m/44'/60'/0'/0/0",
+  "m/44'/60'/0'/0/1",
+  "m/44'/60'/1'/0/0",
+  "m/44'/60'/0'/1/0",
+];
+
 #[derive(Clone, Copy)]
 pub struct EvmProfile {
   pub name: &'static str,
@@ -78,6 +85,22 @@ pub const POLYGON_PROFILE: EvmProfile = EvmProfile {
   export_descriptor: "polygon-address",
   export_file_prefix: "matic",
   scan_paths: POLYGON_SCAN_PATHS,
+};
+
+pub const BNB_PROFILE: EvmProfile = EvmProfile {
+  name: "BNB Smart Chain",
+  wallet_title: "BNB Wallet",
+  derivation_mode_prompt: "Select derivation mode (BNB):",
+  derivation_style_prompt: "Select derivation style (BNB):",
+  address_count_prompt: "How many BNB addresses generate?",
+  rpc_prompt: "BSC RPC URL (enter to skip balance check)",
+  scan_title: "Scanning common BNB derivation paths:",
+  scan_tip: None,
+  export_network: "bsc",
+  export_script_type: "bsc-evm-bip44",
+  export_descriptor: "bsc-address",
+  export_file_prefix: "bnb",
+  scan_paths: BNB_SCAN_PATHS,
 };
 
 #[derive(Clone)]
@@ -150,6 +173,10 @@ pub fn prompt_address_count(profile: &EvmProfile) -> Result<u32, Box<dyn Error>>
 }
 
 pub fn prompt_rpc_url(profile: &EvmProfile) -> Result<String, Box<dyn Error>> {
+  if !crate::constants::RPC_URL_ENABLE {
+    return Ok(String::new());
+  }
+
   let url: String = Input::with_theme(&dialoguer_theme("►"))
     .with_prompt(profile.rpc_prompt)
     .allow_empty(true)

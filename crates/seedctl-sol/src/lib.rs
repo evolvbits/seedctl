@@ -1,5 +1,6 @@
 mod derive;
 mod output;
+mod rpc;
 mod utils;
 mod wallet;
 
@@ -23,6 +24,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
 
   // 5) Derivation path (fixo m/44'/501'/0'/0' + índice)
   let addr_count = utils::prompt_address_count()?;
+  let rpc_url = utils::prompt_rpc_url()?;
   // let show_privkeys = utils::prompt_show_privkeys()?; // It asks if you want to show the private key.
   let show_privkeys = true;
 
@@ -45,11 +47,16 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     (secret_hex, pubkey_hex)
   };
 
-  let mut addresses: Vec<(String, String)> = Vec::with_capacity(addr_count as usize);
+  let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
   for i in 0..addr_count {
     let (_, addr) = derive::keypair_and_address(&seed, i)?;
     let path = format!("m/44'/501'/{}'/0'", i);
-    addresses.push((path.clone(), addr.clone()));
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path, addr, balance));
   }
 
   let export = wallet::build_export(info, &first_pubkey_hex)?;

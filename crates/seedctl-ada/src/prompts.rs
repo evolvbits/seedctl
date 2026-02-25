@@ -1,5 +1,5 @@
 use dialoguer::{Input, Select};
-use seedctl_core::ui::dialoguer_theme;
+use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
 #[derive(Clone, Copy)]
@@ -57,4 +57,16 @@ pub fn prompt_address_count() -> Result<u32, Box<dyn Error>> {
     .interact_text()?;
 
   Ok(count)
+}
+
+pub fn prompt_rpc_url() -> Result<String, Box<dyn Error>> {
+  if !RPC_URL_ENABLE {
+    return Ok(String::new());
+  }
+
+  let s: String = Input::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Cardano address API URL (Koios /address_info, enter to skip)")
+    .allow_empty(true)
+    .interact_text()?;
+  Ok(s)
 }

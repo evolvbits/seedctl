@@ -1,6 +1,7 @@
 mod derive;
 mod output;
 mod prompts;
+mod rpc;
 mod utils;
 mod wallet;
 
@@ -8,9 +9,7 @@ use bip39::Mnemonic;
 use bitcoin::key::Secp256k1;
 use console::style;
 use seedctl_core::{
-  ui::{
-    print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase,
-  },
+  ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::{format_fingerprint_hex, print_mnemonic},
 };
@@ -44,6 +43,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     _ => unreachable!(),
   };
 
+  let rpc_url = prompts::prompt_rpc_url()?;
+
   let go_continue = prompt_confirm_options()?;
   if go_continue == 1 {
     exit(0);
@@ -55,7 +56,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
-  let addresses = derive::receive_addresses(
+  let receive_addresses = derive::receive_addresses(
     &acc_xpub,
     &secp,
     btc_network,
@@ -64,6 +65,17 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     coin_type,
     10,
   )?;
+
+  let mut addresses: Vec<(String, String, Option<f64>)> =
+    Vec::with_capacity(receive_addresses.len());
+  for (path, addr) in receive_addresses {
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path, addr, balance));
+  }
 
   output::print_wallet_output(&output::WalletOutput {
     purpose,
@@ -75,7 +87,6 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     desc_change: &desc_change,
     addresses: &addresses,
   });
-
 
   // Watch-only wallet
   let watch_only = true;

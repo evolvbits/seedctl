@@ -1,6 +1,6 @@
 use dialoguer::Input;
 use ed25519_hd_key::derive_from_path;
-use seedctl_core::ui::dialoguer_theme;
+use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
 /// Deriva chave privada Ed25519 (32 bytes) para o índice da conta.
@@ -23,6 +23,18 @@ pub fn prompt_address_count() -> Result<u32, Box<dyn Error>> {
     .default(10)
     .interact_text()?;
   Ok(n)
+}
+
+pub fn prompt_rpc_url() -> Result<String, Box<dyn Error>> {
+  if !RPC_URL_ENABLE {
+    return Ok(String::new());
+  }
+
+  let s: String = Input::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Solana RPC URL (enter to skip balance check)")
+    .allow_empty(true)
+    .interact_text()?;
+  Ok(s)
 }
 
 #[allow(dead_code)]

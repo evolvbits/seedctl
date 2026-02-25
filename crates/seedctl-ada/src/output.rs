@@ -6,7 +6,7 @@ pub struct WalletOutput<'a> {
   pub account_xprv: &'a str,
   pub account_xpub: &'a str,
   pub show_privkeys: bool,
-  pub addresses: &'a [(String, String)],
+  pub addresses: &'a [(String, String, Option<f64>)],
 }
 
 pub fn print_wallet_output(output: &WalletOutput<'_>) {
@@ -23,7 +23,7 @@ pub fn print_wallet_output(output: &WalletOutput<'_>) {
     None,
     account_xprv_opt,
     output.account_xpub,
-    AddressRows::Basic(output.addresses),
+    AddressRows::WithBalance(output.addresses),
     vec![],
   );
 }
