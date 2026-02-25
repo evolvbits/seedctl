@@ -85,8 +85,8 @@ fn main() -> Result<(), Box<dyn Error>> {
           "Solana (SOL + SPL tokens)",
           "Litecoin (LTC)",
           "Polygon (MATIC, EVM)",
-          // "Cardano (ADA) [experimental]",
-          // "Monero (XMR) [experimental]",
+          "Cardano (ADA)",
+          "Monero (XMR)",
         ])
         .default(0)
         .interact()
@@ -101,8 +101,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         3 => seedctl_sol::run("Solana (SOL)", &mnemonic, info)?,
         4 => seedctl_ltc::run("Litecoin (LTC)", &mnemonic, info)?,
         5 => seedctl_matic::run("Polygon (POL)", &mnemonic, info)?,
-        // 6 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
-        // 7 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
+        6 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
+        7 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
         _ => unreachable!(),
       };
     }
