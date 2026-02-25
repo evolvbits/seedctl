@@ -18,8 +18,8 @@ seedctl-trx = { path = "crates/seedctl-trx" }
 seedctl-sol = { path = "crates/seedctl-sol" }
 seedctl-ltc = { path = "crates/seedctl-ltc" }
 seedctl-matic = { path = "crates/seedctl-matic" }
-#seedctl-ada = { path = "crates/seedctl-ada" }
-#seedctl-xmr = { path = "crates/seedctl-xmr" }
+seedctl-ada = { path = "crates/seedctl-ada" }
+seedctl-xmr = { path = "crates/seedctl-xmr" }
 anyhow = "1.0.101"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

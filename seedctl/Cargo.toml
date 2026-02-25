@@ -20,8 +20,8 @@ seedctl-trx = { workspace = true }
 seedctl-sol = { workspace = true }
 seedctl-ltc = { workspace = true }
 seedctl-matic = { workspace = true }
-#seedctl-ada = { workspace = true }
-#seedctl-xmr = { workspace = true }
+seedctl-ada = { workspace = true }
+seedctl-xmr = { workspace = true }
 
 # Crates vendors
 console = { workspace = true }
