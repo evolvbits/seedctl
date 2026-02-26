@@ -39,7 +39,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
       // Show slogan
       println!("{}", style("\n:: Welcome to").bold());
-      utils::slogan::slogan_view(true, true);
+      utils::slogan::slogan_view(false, true);
 
       // 0) Choose between generating a new wallet or importing an existing seed.
       let action = Select::with_theme(&dialoguer_theme("►"))

@@ -70,5 +70,7 @@ pub fn slogan_view(show_doc: bool, show_version: bool) {
       "Documentation: ".bold().yellow(),
       format!("{}/README.md", meta::PROJECT_REPOSITORY).cyan()
     );
+  } else {
+    println!("\n");
   }
 }
