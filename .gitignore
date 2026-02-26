@@ -2,3 +2,7 @@
 /temp
 /.idea
 *-watch-only.json
+/.venv*
+/.continue
+/.ai
+/.aider*
