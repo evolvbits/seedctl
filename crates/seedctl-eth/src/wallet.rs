@@ -1,31 +1,48 @@
+//! Ethereum watch-only wallet export builder.
+//!
+//! Thin wrapper around [`seedctl_core::evm::build_watch_only_export`] bound
+//! to the [`seedctl_core::evm::ETHEREUM_PROFILE`] so that the rest of the
+//! crate never references the profile constant directly.
+
 use seedctl_core::export;
 use std::error::Error;
 
+/// Builds a [`export::WalletExport`] document for an Ethereum watch-only wallet.
+///
+/// Delegates to [`seedctl_core::evm::build_watch_only_export`] with the
+/// [`seedctl_core::evm::ETHEREUM_PROFILE`], which fills in the Ethereum-specific
+/// `network`, `script_type`, and `descriptors` fields.
+///
+/// # Parameters
+///
+/// - `info`      — software metadata slice `[name, version, repository]`.
+/// - `base_path` — account-level BIP-32 derivation path string, e.g.
+///   `"m/44'/60'/0'/0"`.
+/// - `xpub`      — account-level EVM extended public key used to derive the
+///   watch-only descriptor and fingerprint.
+///
+/// # Returns
+///
+/// A fully populated [`export::WalletExport`] with:
+///
+/// - `network`     = `"ethereum"`
+/// - `script_type` = `"ethereum-bip44"`
+/// - `watch_only`  = `true`
+/// - No private key (`account_xprv` = `None`).
+///
+/// # Errors
+///
+/// This function is infallible in practice — the `Result` wrapper exists
+/// only to keep the call-site signature uniform across all EVM crates.
 pub fn build_export(
   info: &[&str],
   base_path: &str,
-  xpub: bip32::ExtendedPublicKey<k256::ecdsa::VerifyingKey>,
+  xpub: seedctl_core::evm::EvmAccountXpub,
 ) -> Result<export::WalletExport, Box<dyn Error>> {
-  Ok(export::WalletExport {
-    software: export::SoftwareInfo {
-      name: info[0].to_string(),
-      version: info[1].to_string(),
-      repository: info[2].to_string(),
-    },
-    network: "ethereum".into(),
-    script_type: "ethereum-bip44".into(),
-    key_origin: export::KeyOrigin {
-      fingerprint: hex::encode(&xpub.to_bytes()[0..4]),
-      derivation_path: base_path.into(),
-    },
-    watch_only: true,
-    keys: export::Keys {
-      account_xpub: hex::encode(xpub.to_bytes()),
-      account_xprv: None,
-    },
-    descriptors: export::Descriptors {
-      receive: "ethereum-address".into(),
-      change: "ethereum-address".into(),
-    },
-  })
+  Ok(seedctl_core::evm::build_watch_only_export(
+    &seedctl_core::evm::ETHEREUM_PROFILE,
+    info,
+    base_path,
+    xpub,
+  ))
 }

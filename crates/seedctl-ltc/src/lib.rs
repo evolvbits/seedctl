@@ -1,81 +1,119 @@
-use bech32::{self, Hrp, Bech32};
-use bip32::{DerivationPath, XPrv};
+//! Litecoin (LTC) wallet derivation crate for `seedctl`.
+//!
+//! Litecoin uses the same secp256k1 curve as Bitcoin but with its own
+//! SLIP-44 coin type (`2` for Mainnet, `1` for Testnet) and bech32 address
+//! encoding with the `ltc` / `tltc` HRP. The derivation path follows
+//! `m/84'/<coin_type>'/0'` (BIP-84 Native SegWit P2WPKH), producing
+//! `ltc1…` addresses compatible with Litecoin Core and most LTC wallets.
+//!
+//! Orchestrates the full interactive workflow:
+//!
+//! 1. Network selection (Mainnet / Testnet).
+//! 2. Optional BIP-39 passphrase prompt.
+//! 3. BIP-32 master key derivation from the mnemonic.
+//! 4. Account key derivation at `m/84'/<coin_type>'/0'`.
+//! 5. Receive address generation with optional on-chain balance queries.
+//! 6. Wallet display and optional watch-only JSON export.
+
+mod derive;
+mod output;
+mod prompts;
+mod rpc;
+mod wallet;
+
 use bip39::Mnemonic;
 use console::style;
-use ripemd::Ripemd160;
 use seedctl_core::{
-  export,
-  ui::{print_address_table, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
+  ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
-  utils::{format_fingerprint_hex, print_mnemonic},
+  utils::{format_fingerprint_hex, master_from_mnemonic_bip32, print_mnemonic},
 };
 use serde_json::to_string_pretty;
-use sha2::{Digest as ShaDigest, Sha256};
 use std::{error::Error, fs, process::exit};
 
-#[derive(Clone, Copy)]
-enum LtcNetwork {
-  Mainnet,
-  Testnet,
-}
-
-fn encode_bech32(hrp: &str, data: &[u8]) -> Result<String, bech32::EncodeError> {
-  bech32::encode::<Bech32>(Hrp::parse(hrp).unwrap(), data)
-}
-
+/// Runs the interactive Litecoin wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Litecoin (LTC)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
-  // 1) Escolher mainnet/testnet da Litecoin
-  let (network, coin_type) = select_network()?;
+  // Step 1 — choose Mainnet or Testnet; coin_type follows SLIP-44.
+  let (network, coin_type) = prompts::select_network()?;
 
-  // 2) Passphrase opcional
+  // Step 2 — optional BIP-39 passphrase.
   let passphrase = prompt_passphrase()?;
-  let seed = mnemonic.to_seed(&passphrase);
 
-  // 3) Derivação padrão BIP84: m/84'/coin_type'/0'
-  let account_path_str = format!("m/84'/{}'/0'", coin_type);
-  let account_path: DerivationPath = account_path_str.parse()?;
-  let master_xprv = XPrv::new(&seed)?;
-  let account_xprv = XPrv::derive_from_path(&seed, &account_path)?;
-  let account_xpub = account_xprv.public_key();
-  let fingerprint = bip32::XPub::from(&master_xprv).fingerprint();
+  // Step 3 — derive the BIP-32 master key from the mnemonic + passphrase.
+  let master = master_from_mnemonic_bip32(mnemonic, &passphrase)?;
 
-  let script_type = "bip84";
-  let derivation_path = account_path_str.clone();
+  // Step 4 — derive the account-level key pair at m/84'/<coin_type>'/0'.
+  let (account_xprv, account_xpub, fingerprint) = derive::derive_account(&master, coin_type)?;
+  let account_xprv_hex = hex::encode(account_xprv.to_bytes());
+  let account_xpub_hex = hex::encode(account_xpub.to_bytes());
+  let derivation_path = format!("m/84'/{}'/0'", coin_type);
 
   let go_continue = prompt_confirm_options()?;
   if go_continue == 1 {
     exit(0);
   }
 
-  seedctl_core::ui::print_wallet_header(coin_name);
+  // Step 5 — optionally prompt for an RPC URL for balance queries.
+  let rpc_url = prompts::prompt_rpc_url()?;
 
+  // Step 6 — display wallet header and mnemonic table.
+  print_wallet_header(coin_name);
   print_mnemonic(
     mnemonic,
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
-  let addresses = receive_addresses(&seed, &account_path_str, network, coin_type, 10)?;
+  // Step 7 — derive receive addresses and optionally query balances.
+  let receive_addresses = derive::receive_addresses(&account_xprv, network, coin_type, 10)?;
+  let mut addresses: Vec<(String, String, Option<f64>)> =
+    Vec::with_capacity(receive_addresses.len());
 
-  print_wallet_output(
-    script_type,
+  for (path, addr) in receive_addresses {
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path, addr, balance));
+  }
+
+  // Step 8 — render the wallet section to the terminal.
+  output::print_wallet_output(&output::WalletOutput {
     coin_type,
-    &fingerprint,
-    &account_xprv,
-    &account_xpub,
-    &addresses,
-  );
+    fingerprint: &fingerprint,
+    account_xprv: &account_xprv_hex,
+    account_xpub: &account_xpub_hex,
+    addresses: &addresses,
+  });
 
-  // Export watch-only (xpub + descriptors simples)
-  let export = build_export(
+  // Step 9 — assemble the watch-only export document.
+  let export = wallet::build_export(&wallet::BuildExport {
     info,
     network,
-    script_type,
-    &derivation_path,
-    &fingerprint,
-    &account_xpub,
-  );
+    script_type: "bip84",
+    derivation_path: &derivation_path,
+    fingerprint: &fingerprint,
+    account_xpub: &account_xpub_hex,
+  });
 
-  let json = to_string_pretty(&export).unwrap();
+  // Step 10 — optionally write the watch-only JSON file to the home directory.
+  let json = to_string_pretty(&export)?;
   let export_watch_only = prompt_export_watch_only()?;
 
   if export_watch_only == 0 {
@@ -92,155 +130,4 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   }
 
   Ok(())
-}
-
-fn select_network() -> Result<(LtcNetwork, u32), Box<dyn Error>> {
-  use dialoguer::Select;
-  use seedctl_core::ui::dialoguer_theme;
-
-  let choice = Select::with_theme(&dialoguer_theme("►"))
-    .with_prompt("Litecoin network:")
-    .items(["Mainnet", "Testnet"])
-    .default(0)
-    .interact()?;
-
-  Ok(match choice {
-    // SLIP-44: 2' para Litecoin mainnet, 1' para testnets
-    0 => (LtcNetwork::Mainnet, 2),
-    1 => (LtcNetwork::Testnet, 1),
-    _ => unreachable!(),
-  })
-}
-
-fn receive_addresses(
-  seed: &[u8],
-  account_path_str: &str,
-  network: LtcNetwork,
-  coin_type: u32,
-  count: u32,
-) -> Result<Vec<(String, String)>, Box<dyn Error>> {
-  let mut out = Vec::with_capacity(count as usize);
-
-  for i in 0..count {
-    let full_path_str = format!("{}/0/{}", account_path_str, i);
-    let full_path: DerivationPath = full_path_str.parse()?;
-    let xprv = XPrv::derive_from_path(seed, &full_path)?;
-    let privkey = xprv.private_key();
-
-    // Deriva chave pública secp256k1 comprimida via k256
-    let signing = k256::ecdsa::SigningKey::from_bytes(&privkey.to_bytes())?;
-    let pubkey = signing.verifying_key().to_encoded_point(true);
-    let pub_bytes = pubkey.as_bytes();
-
-    let addr = ltc_bech32_p2wpkh(pub_bytes, network)?;
-
-    out.push((format!("m/84'/{}'/0'/0/{}", coin_type, i), addr));
-  }
-
-  Ok(out)
-}
-
-fn ltc_bech32_p2wpkh(
-  pubkey_compressed: &[u8],
-  network: LtcNetwork,
-) -> Result<String, Box<dyn Error>> {
-  // HASH160(pubkey)
-  let sha = Sha256::digest(pubkey_compressed);
-  let rip = Ripemd160::digest(&sha);
-
-  let mut program = Vec::with_capacity(1 + rip.len());
-  // Versão 0 para P2WPKH
-  program.push(0u8);
-  program.extend_from_slice(&rip);
-
-  let hrp = match network {
-    LtcNetwork::Mainnet => "ltc",
-    LtcNetwork::Testnet => "tltc",
-  };
-
-  let resul = encode_bech32(hrp, &program)?;
-
-  Ok(resul)
-}
-
-fn build_export(
-  info: &[&str],
-  network: LtcNetwork,
-  script_type: &str,
-  derivation_path: &str,
-  fingerprint: &[u8; 4],
-  account_xpub: &bip32::XPub,
-) -> export::WalletExport {
-  let network_str = match network {
-    LtcNetwork::Mainnet => "litecoin",
-    LtcNetwork::Testnet => "litecoin-testnet",
-  };
-
-  export::WalletExport {
-    software: export::SoftwareInfo {
-      name: info[0].to_string(),
-      version: info[1].to_string(),
-      repository: info[2].to_string(),
-    },
-    network: network_str.to_string(),
-    script_type: script_type.to_string(),
-    key_origin: export::KeyOrigin {
-      fingerprint: format_fingerprint_hex(fingerprint),
-      derivation_path: derivation_path.to_string(),
-    },
-    watch_only: true,
-    keys: export::Keys {
-      // exporta xpub em hex, como no ETH
-      account_xpub: hex::encode(account_xpub.to_bytes()),
-      account_xprv: None,
-    },
-    descriptors: export::Descriptors {
-      receive: "ltc-bip84".into(),
-      change: "ltc-bip84".into(),
-    },
-  }
-}
-fn print_wallet_output(
-  script_type: &str,
-  coin_type: u32,
-  fingerprint: &[u8; 4],
-  account_xprv: &XPrv,
-  account_xpub: &bip32::XPub,
-  addresses: &[(String, String)],
-) {
-  println!(
-    "\n{} {} m/84'/{}'/0'",
-    style("[PUBLIC] → ").bold().yellow(),
-    style("Derivation path:").bold().cyan(),
-    coin_type
-  );
-
-  println!(
-    "\n{} {} {}",
-    style("[PUBLIC] → ").bold().yellow(),
-    style("Master fingerprint:").bold().cyan(),
-    format_fingerprint_hex(fingerprint),
-  );
-
-  println!(
-    "\n{} ({})\n{}",
-    style("[SECRET] → Account Private Key:").bold().red(),
-    script_type,
-    style(hex::encode(account_xprv.to_bytes())),
-  );
-
-  println!(
-    "\n{} ({})\n{}",
-    style("[PUBLIC] → Account Public Key:").bold().yellow(),
-    script_type,
-    hex::encode(account_xpub.to_bytes())
-  );
-
-  println!(
-    "\n{} {}",
-    style("[PUBLIC] → ").bold().yellow(),
-    style("Showing first 10 receive addresses: ").bold().cyan()
-  );
-
-  print_address_table(addresses);
 }

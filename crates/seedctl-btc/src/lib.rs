@@ -1,17 +1,47 @@
+//! Bitcoin (BTC) wallet derivation crate for `seedctl`.
+//!
+//! Provides the [`run`] entry point called by the `seedctl` binary when the
+//! user selects the Bitcoin network. Orchestrates:
+//!
+//! 1. Network selection (Mainnet / Testnet).
+//! 2. Optional BIP-39 passphrase prompt.
+//! 3. BIP-32 master key derivation from the mnemonic.
+//! 4. BIP purpose / address type selection (BIP-84, BIP-49, BIP-44).
+//! 5. Account key pair and output descriptor assembly.
+//! 6. Address derivation with optional on-chain balance queries.
+//! 7. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
+mod rpc;
 mod utils;
 mod wallet;
 
+/// Runs the interactive Bitcoin wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Bitcoin (BTC)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 use bip39::Mnemonic;
 use bitcoin::key::Secp256k1;
 use console::style;
-use seedctl_core::utils::print_mnemonic;
 use seedctl_core::{
   ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
-  utils::format_fingerprint_hex,
+  utils::{format_fingerprint_hex, print_mnemonic},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -43,6 +73,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     _ => unreachable!(),
   };
 
+  let rpc_url = prompts::prompt_rpc_url()?;
+
   let go_continue = prompt_confirm_options()?;
   if go_continue == 1 {
     exit(0);
@@ -54,7 +86,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
-  let addresses = derive::receive_addresses(
+  let receive_addresses = derive::receive_addresses(
     &acc_xpub,
     &secp,
     btc_network,
@@ -63,6 +95,17 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     coin_type,
     10,
   )?;
+
+  let mut addresses: Vec<(String, String, Option<f64>)> =
+    Vec::with_capacity(receive_addresses.len());
+  for (path, addr) in receive_addresses {
+    let balance = if rpc_url.is_empty() {
+      None
+    } else {
+      rpc::get_balance(&rpc_url, &addr)
+    };
+    addresses.push((path, addr, balance));
+  }
 
   output::print_wallet_output(&output::WalletOutput {
     purpose,

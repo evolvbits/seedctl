@@ -10,8 +10,8 @@ These steps are designed to match exactly how releases are produced by the curre
 
 For every tagged release (`vX.Y.Z`), the GitHub Release contains:
 
-* `seedctl` — Linux binary
-* `seedctl.exe` — Windows binary
+* `seedctl-<VERSION>-linux-x86_64` — Linux binary
+* `seedctl-<VERSION>-windows-x86_64.exe` — Windows binary
 * `SHA256SUMS` — SHA-256 checksums for all binaries
 * `SHA256SUMS.asc` — GPG signature of `SHA256SUMS`
 
@@ -44,8 +44,9 @@ For stronger guarantees, combine this with **reproducible builds** (see `REPRODU
 
 From the GitHub Releases page, download **all** the following into the same directory:
 
-* `seedctl-linux`
-* `seedctl-windows.exe`
+* `seedctl-<VERSION>-linux-x86_64`
+* `seedctl-<VERSION>-windows-x86_64.exe`
+* `seedctl-<VERSION>-linux-x86_64.AppImage`
 * `SHA256SUMS`
 * `SHA256SUMS.asc`
 
@@ -53,8 +54,9 @@ Example:
 
 ```bash
 ls
-seedctl-linux
-seedctl-windows.exe
+seedctl-<VERSION>-linux-x86_64
+seedctl-<VERSION>-windows-x86_64.exe
+seedctl-<VERSION>-linux-x86_64.AppImage
 SHA256SUMS
 SHA256SUMS.asc
 ```
@@ -108,8 +110,8 @@ sha256sum -c SHA256SUMS
 Expected output:
 
 ```text
-seedctl-linux: OK
-seedctl-windows.exe: OK
+seedctl-<VERSION>-linux-x86_64: OK
+seedctl-<VERSION>-windows-x86_64.exe: OK
 ```
 
 If any file fails verification, discard it immediately.
@@ -159,4 +161,4 @@ Reproducibility + cryptographic signatures together provide the strongest guaran
 ✔ SHA-256 verifies **what** you downloaded
 ✔ Reproducible builds verify **how** it was built
 
-Always verify **before** using this software, and prefer an offline, air‑gapped environment when possible.
+Always verify **before** using this software and prefer an offline, air‑gapped environment when possible.

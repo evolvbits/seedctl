@@ -1,20 +1,29 @@
+//! Shared utility functions used across all `seedctl-*` crates.
+//!
+//! Provides hashing helpers, BIP-32 master key derivation, dice input,
+//! mnemonic display and fingerprint formatting.
+
 use crate::constants::BITS_PER_DIE;
 use bip32::XPrv;
 use bip39::Mnemonic;
 use console::style;
 use crossterm::{
   cursor::{Hide, Show},
-  event::{Event, KeyCode, read},
+  event::{self, Event, KeyCode, read},
   execute,
   terminal::{Clear, ClearType, disable_raw_mode, enable_raw_mode},
 };
 use rand::RngExt;
 use sha2::{Digest, Sha256};
-use std::error::Error;
-use std::io::{self, Write};
+use std::{
+  error::Error,
+  io::{self, Write},
+  time::Duration,
+};
 
-// SHA-256 genérico sobre uma ou mais fatias de bytes.
-// Usado por dice_hash e por entropy::combine_entropy.
+/// Computes SHA-256 over one or more byte slices concatenated in order.
+///
+/// Used by [`dice_hash`] and [`crate::entropy`] to combine entropy sources.
 pub fn sha256_hash(slices: &[&[u8]]) -> Vec<u8> {
   let mut hasher = Sha256::new();
   for slice in slices {
@@ -23,19 +32,30 @@ pub fn sha256_hash(slices: &[&[u8]]) -> Vec<u8> {
   hasher.finalize().to_vec()
 }
 
+/// Derives a BIP-32 master extended private key from a BIP-39 mnemonic and passphrase.
 pub fn master_from_mnemonic(mnemonic: &Mnemonic, passphrase: &str) -> Result<XPrv, Box<dyn Error>> {
   let seed = mnemonic.to_seed(passphrase);
   Ok(XPrv::new(seed)?)
 }
 
+/// Generates `count` random dice rolls in the range `[1, 6]` using the system RNG.
 pub fn generate_random_dice(count: usize) -> Vec<u8> {
   let mut rng = rand::rng();
   (0..count).map(|_| rng.random_range(1..=6)).collect()
 }
 
+/// Reads a manual dice sequence from the terminal with real-time feedback.
+///
+/// Blocks until the user has entered at least enough dice rolls to reach
+/// `bits_target` bits of entropy, then presses Enter.
 pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
   enable_raw_mode().unwrap();
   execute!(io::stdout(), Hide).unwrap();
+
+  // Drain any pending key events left over from previous menu interactions.
+  while event::poll(Duration::from_millis(0)).unwrap() {
+    let _ = event::read();
+  }
 
   let mut dice: Vec<u8> = Vec::new();
 
@@ -51,7 +71,10 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
           dice.pop();
         }
         KeyCode::Enter => {
-          break;
+          // Require at least one die before accepting.
+          if !dice.is_empty() {
+            break;
+          }
         }
         _ => {}
       }
@@ -68,7 +91,6 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
 
       let dice_str: String = dice.iter().map(|d| char::from(b'0' + *d)).collect();
 
-      // Rewrite ONLY the current line
       print!("\r");
       execute!(io::stdout(), Clear(ClearType::CurrentLine)).unwrap();
 
@@ -88,8 +110,9 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
   dice
 }
 
-/// Helper genérico para imprimir o mnemonic com índices.
-/// Usado por todas as crates para evitar duplicação.
+/// Prints a BIP-39 mnemonic as a numbered table with word indices.
+///
+/// Used by all chain crates to avoid UI duplication.
 pub fn print_mnemonic(mnemonic: &Mnemonic, title: &str) {
   let rows: Vec<(usize, u16, &str)> = mnemonic
     .words()
@@ -100,8 +123,9 @@ pub fn print_mnemonic(mnemonic: &Mnemonic, title: &str) {
   crate::ui::print_mnemonic_table(title, &rows);
 }
 
-/// Helper genérico para criar XPrv (bip32) a partir de mnemonic e passphrase.
-/// Usado por ETH, TRX, MATIC para evitar duplicação.
+/// Derives a BIP-32 master `XPrv` from a mnemonic and optional passphrase.
+///
+/// Alias used by EVM-compatible chains (ETH, TRX, MATIC).
 pub fn master_from_mnemonic_bip32(
   mnemonic: &Mnemonic,
   passphrase: &str,
@@ -110,16 +134,22 @@ pub fn master_from_mnemonic_bip32(
   Ok(XPrv::new(seed)?)
 }
 
+/// Returns the SHA-256 hash of a dice byte sequence.
+///
+/// The explicit `as &[&[u8]]` cast is required to trigger array-to-slice
+/// unsizing coercion before passing to [`sha256_hash`].
 pub fn dice_hash(dice: &[u8]) -> Vec<u8> {
-  sha256_hash(&[dice])
+  sha256_hash(&[dice] as &[&[u8]])
 }
 
+/// Returns the minimum number of dice rolls needed to reach `bits` of entropy.
 pub fn required_dice(bits: usize) -> usize {
   ((bits as f64) / BITS_PER_DIE).ceil() as usize
 }
 
-/// Formata fingerprint (4 bytes) em hex minúsculo, ex.: "a1b2c3d4".
-/// Usado em nomes de arquivo de export e em key_origin.
+/// Formats a 4-byte fingerprint as a lowercase hex string (e.g. `"a1b2c3d4"`).
+///
+/// Used in export filenames and `key_origin` descriptors.
 pub fn format_fingerprint_hex(fingerprint: &[u8; 4]) -> String {
   format!(
     "{:02x}{:02x}{:02x}{:02x}",

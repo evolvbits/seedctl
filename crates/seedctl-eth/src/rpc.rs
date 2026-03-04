@@ -1,19 +1,15 @@
-use serde_json::json;
+//! Ethereum RPC client re-export.
+//!
+//! Re-exports [`seedctl_core::evm::RpcClient`] under the local `rpc` module
+//! path so that [`crate::run`] can reference `rpc::RpcClient` without
+//! importing from `seedctl_core` directly.
+//!
+//! The [`RpcClient`] sends standard Ethereum JSON-RPC `eth_getBalance`
+//! requests, which are compatible with any EIP-1474 compliant endpoint
+//! (Cloudflare, Infura, Alchemy, local Geth / Reth nodes, etc.).
 
-pub fn get_balance(url: &str, address: &str) -> Option<f64> {
-  let client = reqwest::blocking::Client::new();
-
-  let body = json!({
-    "jsonrpc":"2.0",
-    "id":1,
-    "method":"eth_getBalance",
-    "params":[address,"latest"]
-  });
-
-  let res = client.post(url).json(&body).send().ok()?;
-  let v: serde_json::Value = res.json().ok()?;
-  let hex = v.get("result")?.as_str()?;
-
-  let wei = u128::from_str_radix(hex.trim_start_matches("0x"), 16).ok()?;
-  Some(wei as f64 / 1e18)
-}
+/// Ethereum JSON-RPC client for balance queries.
+///
+/// Re-exported from [`seedctl_core::evm::RpcClient`]. See that type for full
+/// documentation on construction and usage.
+pub use seedctl_core::evm::RpcClient;

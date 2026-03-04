@@ -1,4 +1,18 @@
-//! Polygon
+//! Polygon (MATIC/POL) wallet derivation crate for `seedctl`.
+//!
+//! Polygon is EVM-compatible and shares the same derivation logic as Ethereum
+//! (`m/44'/60'/0'/0/x`). All heavy lifting is delegated to the shared
+//! [`seedctl_core::evm`] module via thin wrapper functions so that only the
+//! chain profile differs across EVM crates.
+//!
+//! Orchestrates the full interactive workflow:
+//!
+//! 1. Optional BIP-39 passphrase prompt.
+//! 2. Derivation-mode selection (generate addresses / scan common paths).
+//! 3. Address count, derivation style, and optional RPC URL prompts.
+//! 4. Account key derivation and address generation with optional balances.
+//! 5. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
@@ -9,18 +23,37 @@ mod wallet;
 
 use bip39::Mnemonic;
 use console::style;
-use seedctl_core::{userprofile, utils::{master_from_mnemonic, print_mnemonic}, ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase}};
+use seedctl_core::{
+  constants::{BIP44, ETHEREUM_COIN_TYPE},
+  ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
+  userprofile,
+  utils::{master_from_mnemonic, print_mnemonic},
+};
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
+/// Runs the interactive Polygon wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Polygon (POL)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
-  // 3) (Opcional) Polygon (EVM) usa a mesma estrutura de chaves do Ethereum.
-
-  // 4) Passphrase opcional
   let passphrase = prompt_passphrase()?;
   let master = master_from_mnemonic(mnemonic, &passphrase)?;
 
-  // 5) Derivation mode/style
+  // Step 1 — choose between generating addresses and scanning common paths.
   let mode = prompts::select_derivation_mode()?;
   if mode == 1 {
     scanner::scan_common_paths(master)?;
@@ -37,7 +70,12 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export = wallet::build_export(info, &base_path, account_xpub.clone())?;
 
   let rpc_url = prompts::prompt_rpc_url()?;
-  // It asks if you want to show the private key (mantemos true por padrão, como no ETH).
+  let rpc_client = if rpc_url.is_empty() {
+    None
+  } else {
+    Some(rpc::RpcClient::new(rpc_url.clone()))
+  };
+  // Private keys are shown unconditionally; add a prompt here to make this configurable.
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -57,19 +95,15 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     let (child, path_str) =
       utils::derive_address_key(&master, &account_xprv, &derivation_style, i)?;
     let addr = derive::address_from_xprv(child)?;
-    let balance = if rpc_url.is_empty() {
-      None
-    } else {
-      rpc::get_balance(&rpc_url, &addr)
-    };
+    let balance = rpc_client
+      .as_ref()
+      .and_then(|client| client.get_balance(&addr));
     addresses.push((path_str, addr, balance));
   }
 
-  let purpose = 44u32; // BIP44
-  let coin = 60u32; // Ethereum coin type
   output::print_wallet_output(&output::WalletOutput {
-    purpose,
-    coin_type: coin,
+    purpose: BIP44,
+    coin_type: ETHEREUM_COIN_TYPE,
     account_xprv: &hex::encode(account_xprv.to_bytes()),
     account_xpub: &hex::encode(account_xpub.to_bytes()),
     show_privkeys,

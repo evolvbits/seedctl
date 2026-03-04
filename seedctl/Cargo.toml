@@ -9,19 +9,21 @@ build = "build.rs"
 
 [package.metadata]
 copyright_year = "2026"
-maintainer = "William C. Canin"
+maintainer = "EvolvBits Contributors"
 
 [dependencies]
 # Crates project
 seedctl-core = { workspace = true }
 seedctl-btc = { workspace = true }
 seedctl-eth = { workspace = true }
+seedctl-bnb = { workspace = true }
+seedctl-xrp = { workspace = true }
 seedctl-trx = { workspace = true }
 seedctl-sol = { workspace = true }
 seedctl-ltc = { workspace = true }
 seedctl-matic = { workspace = true }
-#seedctl-ada = { workspace = true }
-#seedctl-xmr = { workspace = true }
+seedctl-ada = { workspace = true }
+seedctl-xmr = { workspace = true }
 
 # Crates vendors
 console = { workspace = true }

@@ -1,39 +1,15 @@
-use anyhow::Result;
-use serde::Deserialize;
+//! Polygon (MATIC/POL) RPC client re-export.
+//!
+//! Re-exports [`seedctl_core::evm::RpcClient`] under the local `rpc` module
+//! path so that [`crate::run`] can reference `rpc::RpcClient` without
+//! importing from `seedctl_core` directly.
+//!
+//! The [`RpcClient`] uses the standard Ethereum JSON-RPC `eth_getBalance`
+//! method, which is fully compatible with any EVM-compatible node including
+//! Polygon PoS (`https://polygon-rpc.com`) and its edge/zkEVM variants.
 
-#[derive(Deserialize)]
-struct EthRpcResponse {
-  result: Option<String>,
-}
-
-/// Obtém saldo em MATIC (convertido de wei) via RPC compatível com Ethereum.
-pub fn get_balance(rpc_url: &str, address: &str) -> Option<f64> {
-  // Formato JSON-RPC padrão do Ethereum.
-  let body = serde_json::json!({
-    "jsonrpc": "2.0",
-    "method": "eth_getBalance",
-    "params": [address, "latest"],
-    "id": 1,
-  });
-
-  match do_post(rpc_url, &body) {
-    Ok(resp) => {
-      if let Some(result) = resp.result {
-        if let Ok(wei) = u128::from_str_radix(result.trim_start_matches("0x"), 16) {
-          // 1 MATIC = 10^18 wei (mesma escala do ETH).
-          let matic = wei as f64 / 1e18;
-          return Some(matic);
-        }
-      }
-      None
-    }
-    Err(_) => None,
-  }
-}
-
-fn do_post(url: &str, body: &serde_json::Value) -> Result<EthRpcResponse> {
-  let client = reqwest::blocking::Client::new();
-  let resp = client.post(url).json(body).send()?;
-  let parsed: EthRpcResponse = resp.json()?;
-  Ok(parsed)
-}
+/// EVM-compatible JSON-RPC client for Polygon balance queries.
+///
+/// Re-exported from [`seedctl_core::evm::RpcClient`]. See that type for full
+/// documentation on construction and usage.
+pub use seedctl_core::evm::RpcClient;

@@ -1,17 +1,23 @@
+//! Entry point for the `seedctl` command-line application.
+//!
+//! Parses CLI arguments, displays the welcome banner, collects entropy,
+//! derives a BIP-39 mnemonic, and dispatches to the selected chain crate.
+
 mod utils;
 
-use bip39::Mnemonic;
 use dialoguer::{Input, Select};
 use seedctl_core::{
   args,
   entropy::{print_entropy_mode, resolve_final_entropy},
+  mnemonic::MnemonicGenerator,
   options::entropy_type,
+  security::Security,
   ui::{dialoguer_theme, exit_confirm},
   utils::dice_hash,
 };
 use std::error::Error;
 
-use crate::utils::{security::ensure_offline, copyright_phrase, meta};
+use crate::utils::{connection::Connection, copyright_phrase, meta};
 use console::style;
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -25,93 +31,98 @@ fn main() -> Result<(), Box<dyn Error>> {
       return Ok(());
     }
     args::CliAction::Run => {
-      // Clear screen
+      // Clear the terminal before starting the interactive session.
       let term = console::Term::stdout();
       term.clear_screen()?;
 
+      // NOTE: Network connectivity check is intentionally disabled.
+      // Uncomment the block below to enforce air-gapped operation.
+      Connection::check();
+
+      // NOTE: Security warning screen is intentionally disabled.
+      // Uncomment the block below to show the cold-wallet disclaimer.
+      let security = Security;
+      security.warning("I UNDERSTOOD")?;
+
+      // Display the welcome banner.
       println!("{}", style("\n:: Welcome to").bold());
+      utils::slogan::slogan_view(false, true);
 
-      // Check connection internet. If connection = closed
-      ensure_offline();
-
-      // Show warning security
-      utils::security::warning(seedctl_core::ui::WARNING_TEXT, "I UNDERSTOOD")?;
-
-      // Show slogan
-      utils::slogan::slogan_view(true, true);
-
-      // 0) Choose between generating a new wallet or importing an existing seed.
-      let action = Select::with_theme(&dialoguer_theme("►"))
+      // Step 0 — choose between generating a new wallet or importing a seed.
+      let theme = dialoguer_theme("►");
+      let action = Select::with_theme(&theme)
         .with_prompt("Choose action:")
         .items(["Create new wallet", "Import existing wallet"])
         .default(0)
         .interact()
         .unwrap();
 
-      // 1) Get the mnemonic (new or imported)
+      // Step 1 — obtain the mnemonic (freshly generated or user-supplied).
       let mnemonic = match action {
         0 => {
-          // Generate a new universal BIP39 seed from entropy.
+          // Generate a new universal BIP-39 seed from dice-based entropy.
           let entropy_type = entropy_type()?;
           let dice_entropy = dice_hash(&entropy_type.1);
           let dice_mode = entropy_type.2;
           print_entropy_mode(dice_mode);
           let final_entropy = resolve_final_entropy(entropy_type, dice_entropy);
-          Mnemonic::from_entropy(&final_entropy).expect("failed to build mnemonic from entropy")
+          MnemonicGenerator::from_entropy(&final_entropy)?
         }
         1 => loop {
-          let phrase: String = Input::with_theme(&dialoguer_theme("►"))
+          let theme = dialoguer_theme("►");
+          let phrase: String = Input::with_theme(&theme)
             .with_prompt("Enter existing BIP39 seed phrase (12/24 words)")
             .interact_text()?;
 
-          match Mnemonic::parse_normalized(phrase.trim()) {
+          match MnemonicGenerator::parse(&phrase) {
             Ok(m) => break m,
-            Err(e) => {
-              eprintln!("Invalid mnemonic: {e}. Please try again.\n");
-            }
+            Err(_) => eprintln!("Invalid mnemonic phrase. Please try again.\n"),
           }
         },
         _ => unreachable!(),
       };
 
-      // 2) Choose the network/currency
-      let network = Select::with_theme(&dialoguer_theme("►"))
+      // Step 2 — choose the target network / currency.
+      let theme = dialoguer_theme("►");
+      let network = Select::with_theme(&theme)
         .with_prompt("Select network:")
         .items([
           "Bitcoin",
           "Ethereum (ETH + ERC20 tokens)",
+          "BNB (BNB Smart Chain, EVM)",
+          "XRP (XRP Ledger)",
           "Tron (TRX + TRC20 tokens)",
           "Solana (SOL + SPL tokens)",
           "Litecoin (LTC)",
           "Polygon (MATIC, EVM)",
-          // "Cardano (ADA) [experimental]",
-          // "Monero (XMR) [experimental]",
+          "Cardano (ADA)",
+          "Monero (XMR)",
         ])
         .default(0)
         .interact()
         .unwrap();
 
+      // Step 3 — dispatch to the selected chain crate.
       let info = &[meta::PROJECT_NAME, meta::VERSION, meta::PROJECT_REPOSITORY];
 
       match network {
         0 => seedctl_btc::run("Bitcoin (BTC)", &mnemonic, info)?,
         1 => seedctl_eth::run("Ethereum (ETH)", &mnemonic, info)?,
-        2 => seedctl_trx::run("TRON (TRX)", &mnemonic, info)?,
-        3 => seedctl_sol::run("Solana (SOL)", &mnemonic, info)?,
-        4 => seedctl_ltc::run("Litecoin (LTC)", &mnemonic, info)?,
-        5 => seedctl_matic::run("Polygon (POL)", &mnemonic, info)?,
-        // 6 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
-        // 7 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
+        2 => seedctl_bnb::run("BNB Smart Chain (BNB)", &mnemonic, info)?,
+        3 => seedctl_xrp::run("XRP Ledger (XRP)", &mnemonic, info)?,
+        4 => seedctl_trx::run("TRON (TRX)", &mnemonic, info)?,
+        5 => seedctl_sol::run("Solana (SOL)", &mnemonic, info)?,
+        6 => seedctl_ltc::run("Litecoin (LTC)", &mnemonic, info)?,
+        7 => seedctl_matic::run("Polygon (POL)", &mnemonic, info)?,
+        8 => seedctl_ada::run("Cardano (ADA)", &mnemonic, info)?,
+        9 => seedctl_xmr::run("Monero (XMR)", &mnemonic, info)?,
         _ => unreachable!(),
       };
     }
   }
 
-  exit_confirm();
   copyright_phrase();
-
-  // IMPORTANT: Backup your mnemonic and private key now.
-  // Press [ENTER] to redact secrets and proceed to export options.
+  exit_confirm();
 
   Ok(())
 }

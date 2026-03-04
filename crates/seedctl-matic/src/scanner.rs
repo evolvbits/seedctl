@@ -1,33 +1,29 @@
-use bip32::{DerivationPath, XPrv};
-use console::style;
+//! Polygon (MATIC/POL) derivation-path scanner.
+//!
+//! Thin wrapper around [`seedctl_core::evm::scan_common_paths`] bound to the
+//! [`seedctl_core::evm::POLYGON_PROFILE`] so that the rest of the crate never
+//! references the profile constant directly.
+
+use bip32::XPrv;
 use std::error::Error;
 
-use crate::derive::address_from_xprv;
-use crate::utils::derive_path;
-
-/// Faz um scan simples em alguns paths comuns para Polygon (mesma lógica do Ethereum).
+/// Scans and prints addresses for the most common Polygon derivation paths
+/// derived from `master`.
+///
+/// Iterates over the paths defined in [`seedctl_core::evm::POLYGON_PROFILE`]
+/// (`scan_paths` field), derives an EVM address for each one, and prints a
+/// formatted table to stdout so the user can identify which path their
+/// existing wallet uses.
+///
+/// # Parameters
+///
+/// - `master` — BIP-32 master extended private key derived from the BIP-39
+///   seed + passphrase.
+///
+/// # Errors
+///
+/// Returns a boxed error if any derivation path cannot be parsed or if key
+/// derivation fails for any path.
 pub fn scan_common_paths(master: XPrv) -> Result<(), Box<dyn Error>> {
-  let paths = [
-    "m/44'/60'/0'/0/0",
-    "m/44'/60'/0'/0/1",
-    "m/44'/60'/0'/1/0",
-    "m/44'/60'/1'/0/0",
-  ];
-
-  println!(
-    "{} {}",
-    style("[SCAN] →").bold().yellow(),
-    style("Scanning common Polygon derivation paths:")
-      .bold()
-      .cyan()
-  );
-
-  for p in paths.iter() {
-    let dp: DerivationPath = p.parse()?;
-    let xprv = derive_path(master.clone(), &dp)?;
-    let addr = address_from_xprv(xprv)?;
-    println!("{} → {}", p, addr);
-  }
-
-  Ok(())
+  seedctl_core::evm::scan_common_paths(master, &seedctl_core::evm::POLYGON_PROFILE)
 }

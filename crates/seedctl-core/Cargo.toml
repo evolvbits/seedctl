@@ -12,9 +12,12 @@ console.workspace = true
 rand.workspace = true
 crossterm.workspace = true
 serde.workspace = true
+serde_json.workspace = true
+hex.workspace = true
 sha2.workspace = true
-bip39 = "2.2.2"
-bip32 = { version = "0.5", features = ["secp256k1"] }
-
-
-
+reqwest.workspace = true
+bip32.workspace = true
+bip39.workspace = true
+if-addrs = "0.15.0"
+k256 = "0.13.4"
+sha3 = "0.10.8"

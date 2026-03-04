@@ -1,3 +1,31 @@
+//! Cross-platform path construction macros for `seedctl`.
+//!
+//! Provides the [`userprofile!`] macro that resolves the current user's home
+//! directory on both Unix (`$HOME`) and Windows (`%USERPROFILE%`) and appends
+//! one or more path components to it.
+
+/// Builds a [`std::path::PathBuf`] rooted at the current user's home directory.
+///
+/// Accepts one or more string expressions that are joined with the
+/// platform-native separator (`/` on Unix, `\` on Windows) and appended to the
+/// home directory path.
+///
+/// # Panics
+///
+/// Panics if the `HOME` (Unix) or `USERPROFILE` (Windows) environment variable
+/// is not set.
+///
+/// # Examples
+///
+/// ```rust
+/// use seedctl_core::userprofile;
+///
+/// // Resolves to e.g. "/home/alice/wallet-btc-abc1234-watch-only.json"
+/// let path = userprofile!("wallet-btc-abc1234-watch-only.json");
+///
+/// // Resolves to e.g. "/home/alice/seedctl/exports/wallet.json"
+/// let nested = userprofile!("seedctl", "exports", "wallet.json");
+/// ```
 #[macro_export]
 macro_rules! userprofile {
   ($($part:expr),*) => {

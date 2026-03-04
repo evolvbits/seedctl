@@ -1,62 +1,28 @@
+//! Shared UI utilities used across all `seedctl-*` crates.
+//!
+//! Provides themed dialoguer prompts, wallet header/footer printing,
+//! mnemonic and address table rendering, and watch-only export helpers.
+
+use crate::traits::address::AddressDisplay;
 use crate::utils::format_fingerprint_hex;
 use console::style;
 use dialoguer::{Input, Select, theme::ColorfulTheme};
 use std::error::Error;
 
-pub const WARNING_TEXT: &str = r#"
-***************************************************************
-  EXTREME SECURITY MODE — COLD WALLET ENVIRONMENT REQUIRED
-***************************************************************
-
-  You are about to reveal the MASTER KEYS to your funds.
-
-  If ANYONE gains access to this data, your assets can be stolen
-  instantly and irreversibly.
-
-  DO NOT CONTINUE unless ALL conditions below are true:
-
-  • This machine is permanently OFFLINE (Wi-Fi, Ethernet, Bluetooth
-    disabled or physically removed)
-  • You booted from a clean, trusted OS (live system recommended)
-  • No cameras, microphones, or screen recording devices are present
-  • No one else can see your screen
-  • This device has NEVER been infected or used for daily browsing
-  • You understand that malware can steal secrets invisibly
-  • You accept full responsibility for key exposure
-
-  STRICT RULES:
-
-  • NEVER store your mnemonic phrase, passphrase, and word indexes digitally and/or share them
-  • NEVER paste it into any website
-  • NEVER photograph it
-  • NEVER upload it
-  • NEVER reuse it on a hot wallet
-
-  LOSS WARNING:
-
-  If you lose your mnemonic or passphrase, your funds are PERMANENTLY
-  LOST.
-  No support. No recovery. No exceptions.
-
-  OPERATION PROTOCOL:
-
-  1. Generate wallet
-  2. Write mnemonic + passphrase on paper (temporary)
-  3. Transfer to a permanent offline backup (steel plate recommended)
-  4. Verify backup accuracy
-  5. DESTROY temporary paper copy
-  6. CLOSE this program immediately"#;
-
-pub fn dialoguer_theme(arrow: &str) -> ColorfulTheme {
-  let mut theme = ColorfulTheme {
-    active_item_prefix: style(arrow.to_string()),
+/// Builds the default [`ColorfulTheme`] with the custom active-item arrow.
+///
+/// Always bind the result to a `let` before passing as `&dyn Theme` so that
+/// the temporary lives long enough for the dialoguer builder chain.
+pub fn dialoguer_theme(_arrow: &str) -> ColorfulTheme {
+  ColorfulTheme {
+    active_item_prefix: style("►".to_string()),
     ..Default::default()
-  };
-
-  theme.active_item_prefix = style("►".to_string());
-  theme
+  }
 }
 
+/// Waits for the user to press Enter on Windows before the process exits.
+///
+/// No-op on non-Windows platforms.
 pub fn exit_confirm() {
   #[cfg(target_os = "windows")]
   {
@@ -72,24 +38,30 @@ pub fn exit_confirm() {
   }
 }
 
-// ---------- Shared prompts (BTC e ETH) ----------
+// ---------- Shared prompts (BTC, ETH, …) ----------
 
-/// Optional passphrase for BIP39. Returns an empty string if the user does not provide one.
+/// Prompts the user for an optional BIP-39 passphrase.
+///
+/// Returns an empty string if the user presses Enter without typing anything.
 pub fn prompt_passphrase() -> Result<String, Box<dyn Error>> {
   let prompt = style("[Optional] Passphrase (enter = empty)")
     .bold()
     .yellow()
     .to_string();
-  let s = Input::with_theme(&dialoguer_theme("►"))
+  let theme = dialoguer_theme("►");
+  let s = Input::with_theme(&theme)
     .with_prompt(prompt)
     .allow_empty(true)
     .interact_text()?;
   Ok(s)
 }
 
-// Confirmation "Are the selected options correct?" 0 = Yes (continue), 1 = No (exit).
+/// Asks the user to confirm that the selected options are correct.
+///
+/// Returns `0` = Yes (continue), `1` = No (exit).
 pub fn prompt_confirm_options() -> Result<usize, Box<dyn Error>> {
-  let choice = Select::with_theme(&dialoguer_theme("►"))
+  let theme = dialoguer_theme("►");
+  let choice = Select::with_theme(&theme)
     .with_prompt("Are the selected options correct?")
     .items(["Yes", "No"])
     .default(0)
@@ -97,9 +69,12 @@ pub fn prompt_confirm_options() -> Result<usize, Box<dyn Error>> {
   Ok(choice)
 }
 
-// Export watch-only wallet? 0 = Yeses, 1 = No.
+/// Asks the user whether to export a watch-only wallet JSON file.
+///
+/// Returns `0` = Yes, `1` = No.
 pub fn prompt_export_watch_only() -> Result<usize, Box<dyn Error>> {
-  let choice = Select::with_theme(&dialoguer_theme("►"))
+  let theme = dialoguer_theme("►");
+  let choice = Select::with_theme(&theme)
     .with_prompt("Export watch-only wallet?")
     .items(["Yes", "No"])
     .default(0)
@@ -107,12 +82,13 @@ pub fn prompt_export_watch_only() -> Result<usize, Box<dyn Error>> {
   Ok(choice)
 }
 
-// ---------- Shared wallet UI (legend, header, mnemonic) ----------
+// ---------- Shared wallet UI (legend, header, mnemonic, addresses) ----------
 
+/// Prints a two-row colour legend explaining SECRET vs PUBLIC data.
 pub fn print_wallet_legend() {
   let rows = vec![
-    ("⏹", "SECRET", "DO NOT SHARE", "red"),
-    ("⏹", "PUBLIC", "WATCH-ONLY DATA", "yellow"),
+    ("red", "SECRET", "DO NOT SHARE", "red"),
+    ("yellow", "PUBLIC", "WATCH-ONLY DATA", "yellow"),
   ];
 
   let sym_w = rows.iter().map(|r| r.0.len()).max().unwrap_or(1);
@@ -122,7 +98,7 @@ pub fn print_wallet_legend() {
   println!("\n{}", style("Legend:").bold());
 
   println!(
-    "----------------------------------\n{:<sym_w$}   {:<type_w$}    {:<desc_w$}",
+    "-------------------------------------\n{:<sym_w$}      {:<type_w$}     {:<desc_w$}",
     "Color",
     "Type",
     "Description",
@@ -157,19 +133,21 @@ pub fn print_wallet_legend() {
   }
 }
 
+/// Sub-module with a generic table printer based on the [`AddressDisplay`] trait.
+pub mod table;
+
+/// Prints the wallet legend followed by the coin-specific section header.
 pub fn print_wallet_header(coin_name: &str) {
   print_wallet_legend();
 
   println!(
     "\n\n{}\n{}",
-    style(format!(":: Your wallet {coin_name}:"))
-      .bold()
-      .blue(),
+    style(format!(":: Your wallet {coin_name}:")).bold().blue(),
     style("-".repeat(83)).bold().blue()
   );
 }
 
-// A line at the end of the wallet.
+/// Prints the closing separator line that marks the end of a wallet section.
 pub fn print_closed_wallet() {
   println!(
     "\n{}",
@@ -177,8 +155,9 @@ pub fn print_closed_wallet() {
   );
 }
 
-// Table of mnemonic: title + lines (position 1-based, word_index 1-based, word).
-// Core does not depend on bip39; each crate assembles the lines and calls this function.
+/// Prints a BIP-39 mnemonic as a numbered two-column table (position, index, word).
+///
+/// `rows` is a slice of `(1-based position, 1-based word index, word)` tuples.
 pub fn print_mnemonic_table(title: &str, rows: &[(usize, u16, &str)]) {
   println!(
     "\n{} {}",
@@ -196,39 +175,11 @@ pub fn print_mnemonic_table(title: &str, rows: &[(usize, u16, &str)]) {
   }
 }
 
-pub trait AddressRow {
-  fn path(&self) -> &str;
-  fn addr(&self) -> &str;
-  fn extra(&self) -> Option<String> {
-    None
-  }
-}
-
-impl AddressRow for (String, String) {
-  fn path(&self) -> &str {
-    &self.0
-  }
-
-  fn addr(&self) -> &str {
-    &self.1
-  }
-}
-
-impl AddressRow for (String, String, Option<f64>) {
-  fn path(&self) -> &str {
-    &self.0
-  }
-
-  fn addr(&self) -> &str {
-    &self.1
-  }
-
-  fn extra(&self) -> Option<String> {
-    self.2.map(|v| format!("{:.8}", v))
-  }
-}
-
-pub fn print_address_table<T: AddressRow>(rows: &[T]) {
+/// Prints an address table for any type that implements [`AddressDisplay`].
+///
+/// Renders an optional third "Extra" column (e.g. balance) when at least
+/// one row provides a non-`None` value.
+pub fn print_address_table<T: AddressDisplay>(rows: &[T]) {
   if rows.is_empty() {
     println!("(no addresses)");
     return;
@@ -296,22 +247,41 @@ pub fn print_address_table<T: AddressRow>(rows: &[T]) {
   }
 }
 
+/// Header data passed to [`print_wallet`] for structured wallet display.
 pub struct WalletHeader<'a> {
+  /// Optional BIP-32 derivation path, e.g. `"m/84'/0'/0'"`.
   pub derivation_path: Option<String>,
+  /// Optional master fingerprint in lowercase hex.
   pub fingerprint: Option<String>,
+  /// Optional account-level extended private key string.
   pub account_xprv: Option<&'a str>,
+  /// Optional account-level extended public key string.
   pub account_xpub: Option<&'a str>,
+  /// Optional number of addresses to display.
   pub addr_count: Option<i64>,
+  /// Output descriptors as `(label, descriptor)` pairs.
   pub descriptors: Vec<(&'a str, &'a str)>,
+  /// Human-readable wallet title shown in the header.
   pub title: &'a str,
 }
 
+/// Address rows passed to [`print_wallet`].
+///
+/// - [`AddressRows::Basic`]: plain `(path, address)` pairs.
+/// - [`AddressRows::WithBalance`]: `(path, address, optional_balance)` triples.
 pub enum AddressRows<'a> {
+  /// Simple path + address pairs with no balance information.
   Basic(&'a [(String, String)]),
+  /// Path + address pairs that may include an on-chain balance.
   WithBalance(&'a [(String, String, Option<f64>)]),
 }
 
-/// Função genérica para imprimir carteiras padrão (m/purpose'/coin_type'/0').
+/// Prints a complete standard wallet section (path → fingerprint → keys →
+/// descriptors → addresses).
+///
+/// This is a convenience wrapper around [`print_wallet`] for the common
+/// `m/purpose'/coin_type'/0'` layout.
+#[allow(clippy::too_many_arguments)]
 pub fn print_standard_wallet<'a>(
   title: &'a str,
   purpose: u32,
@@ -329,7 +299,7 @@ pub fn print_standard_wallet<'a>(
 
   let header = WalletHeader {
     derivation_path: Some(format!("m/{}'/{}'/0'", purpose, coin_type)),
-    fingerprint: fingerprint.map(|fp| format_fingerprint_hex(fp)),
+    fingerprint: fingerprint.map(format_fingerprint_hex),
     account_xprv,
     account_xpub: Some(account_xpub),
     addr_count: Some(addr_len as i64),
@@ -340,13 +310,9 @@ pub fn print_standard_wallet<'a>(
   print_wallet(&header, addr_rows);
 }
 
+/// Renders a full wallet section to stdout using the provided header metadata
+/// and address rows.
 pub fn print_wallet(header: &WalletHeader, rows: AddressRows) {
-  // println!(
-  //   "\n{} {}",
-  //   style("[PUBLIC] →").yellow().bold(),
-  //   style(header.title).cyan().bold()
-  // );
-
   // ───── derivation path ─────
   if let Some(path) = &header.derivation_path {
     println!(
@@ -407,6 +373,8 @@ pub fn print_wallet(header: &WalletHeader, rows: AddressRows) {
   print_closed_wallet();
 }
 
+/// Renders the address table for [`AddressRows::Basic`] or
+/// [`AddressRows::WithBalance`] variants.
 fn print_table(rows: AddressRows) {
   match rows {
     AddressRows::Basic(list) => {
@@ -449,7 +417,7 @@ fn print_table(rows: AddressRows) {
       println!("{}-+-{}-+--------", "-".repeat(path_w), "-".repeat(addr_w));
 
       for (p, a, b) in list {
-        let bal = b.map(|v| v.to_string()).unwrap_or("-".into());
+        let bal = b.map(|v| v.to_string()).unwrap_or_else(|| "-".into());
 
         println!(
           "{:<path_w$} | {:<addr_w$} | {}",
