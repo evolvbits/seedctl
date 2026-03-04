@@ -4,9 +4,9 @@ members = ["crates/*", "seedctl"]
 
 [workspace.package]
 description = "Deterministic, auditable, security-focused multichain wallet manager."
-repository = "https://github.com/williamcanin/seedctl"
+repository = "https://github.com/evolvbits/seedctl"
 version = "0.2.1"
-authors = ["William C. Canin <william.costa.canin@gmail.com>"]
+authors = ["EvolvBits <evolvbits@gmail.com>"]
 edition = "2024"
 rust-version = "1.89"
 
