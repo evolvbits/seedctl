@@ -34,7 +34,7 @@
 - Adding documentation to the code
 - Migrating `SeedCTL` to `@evolvbits`
 
-# [0.3.0] – 2026-??-??
+# [0.3.0] – 2026-??-?? [SHORTLY]
 
 Adding Cold Signing functionality:
 Use the "`alloy" crate for EVM.
