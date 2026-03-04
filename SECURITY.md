@@ -1,53 +1,17 @@
 # Security Policy
 
-For legal/safety terms, see the full disclaimer:
-[`DISCLAIMER.md`](./DISCLAIMER.md)
+## Canonical Security Documentation
 
-## Supported Versions
+Security guidance and policy are maintained at:
 
-Only the latest version of this project is supported.
+- https://evolvbits.github.io/seedctl/docs/#security
 
-## Reporting a Vulnerability
+## Vulnerability Reporting
 
-If you find a security issue:
+Please report vulnerabilities privately to the maintainer.
+Do not open public issues for sensitive security reports.
 
-- Do NOT open a public issue
-- Contact the maintainer privately
-- Provide:
-  - Description of the issue
-  - Impact analysis
-  - Reproduction steps (if possible)
+## Scope
 
-## Security Assumptions
-
-This project assumes:
-
-- Offline usage
-- Trusted execution environment
-- No OS-level compromise
-- No malicious hardware or firmware
-
-The project does NOT attempt to mitigate:
-
-- Malware
-- Keyloggers
-- Screen recording
-- Side-channel attacks
-
-## User Responsibility
-
-The user is fully responsible for:
-
-- Environment security
-- Key storage
-- Backup strategy
-- Understanding key management and derivation paths for Bitcoin, Ethereum, BNB Smart Chain, XRP Ledger, Tron, Solana, Cardano and Monero
-
-Use at your own risk.
-
-## Relationship to Disclaimer
-
-`SECURITY.md` defines the security policy, assumptions, and vulnerability reporting process.
-`DISCLAIMER.md` defines risk acceptance, warranty exclusion, and limitation of liability.
-
-Both documents are complementary and should be kept consistent.
+This file is a repository-level pointer.
+For assumptions, responsibilities, and operational controls, use the canonical page above.
