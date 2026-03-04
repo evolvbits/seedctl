@@ -1,3 +1,8 @@
+//! Entry point for the `seedctl` command-line application.
+//!
+//! Parses CLI arguments, displays the welcome banner, collects entropy,
+//! derives a BIP-39 mnemonic, and dispatches to the selected chain crate.
+
 mod utils;
 
 use dialoguer::{Input, Select};
@@ -26,33 +31,36 @@ fn main() -> Result<(), Box<dyn Error>> {
       return Ok(());
     }
     args::CliAction::Run => {
-      // Clear screen
+      // Clear the terminal before starting the interactive session.
       let term = console::Term::stdout();
       term.clear_screen()?;
 
-      // Check connection internet. If connection = closed
-      // Connection::check();
+      // NOTE: Network connectivity check is intentionally disabled.
+      // Uncomment the block below to enforce air-gapped operation.
+      Connection::check();
 
-      // Show warning security
-      // let security = Security;
-      // security.warning("I UNDERSTOOD")?;
+      // NOTE: Security warning screen is intentionally disabled.
+      // Uncomment the block below to show the cold-wallet disclaimer.
+      let security = Security;
+      security.warning("I UNDERSTOOD")?;
 
-      // Show slogan
+      // Display the welcome banner.
       println!("{}", style("\n:: Welcome to").bold());
       utils::slogan::slogan_view(false, true);
 
-      // 0) Choose between generating a new wallet or importing an existing seed.
-      let action = Select::with_theme(&dialoguer_theme("►"))
+      // Step 0 — choose between generating a new wallet or importing a seed.
+      let theme = dialoguer_theme("►");
+      let action = Select::with_theme(&theme)
         .with_prompt("Choose action:")
         .items(["Create new wallet", "Import existing wallet"])
         .default(0)
         .interact()
         .unwrap();
 
-      // 1) Get the mnemonic (new or imported)
+      // Step 1 — obtain the mnemonic (freshly generated or user-supplied).
       let mnemonic = match action {
         0 => {
-          // Generate a new universal BIP39 seed from entropy.
+          // Generate a new universal BIP-39 seed from dice-based entropy.
           let entropy_type = entropy_type()?;
           let dice_entropy = dice_hash(&entropy_type.1);
           let dice_mode = entropy_type.2;
@@ -61,22 +69,22 @@ fn main() -> Result<(), Box<dyn Error>> {
           MnemonicGenerator::from_entropy(&final_entropy)?
         }
         1 => loop {
-          let phrase: String = Input::with_theme(&dialoguer_theme("►"))
+          let theme = dialoguer_theme("►");
+          let phrase: String = Input::with_theme(&theme)
             .with_prompt("Enter existing BIP39 seed phrase (12/24 words)")
             .interact_text()?;
 
           match MnemonicGenerator::parse(&phrase) {
             Ok(m) => break m,
-            Err(_) => {
-              eprintln!("Invalid mnemonic phrase. Please try again.\n");
-            }
+            Err(_) => eprintln!("Invalid mnemonic phrase. Please try again.\n"),
           }
         },
         _ => unreachable!(),
       };
 
-      // 2) Choose the network/currency
-      let network = Select::with_theme(&dialoguer_theme("►"))
+      // Step 2 — choose the target network / currency.
+      let theme = dialoguer_theme("►");
+      let network = Select::with_theme(&theme)
         .with_prompt("Select network:")
         .items([
           "Bitcoin",
@@ -94,6 +102,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .interact()
         .unwrap();
 
+      // Step 3 — dispatch to the selected chain crate.
       let info = &[meta::PROJECT_NAME, meta::VERSION, meta::PROJECT_REPOSITORY];
 
       match network {
