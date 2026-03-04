@@ -1,5 +1,6 @@
-//! Fluxo de opções de entropia (tamanho do mnemonic, modo dice, entrada manual/auto).
-//! Usado pelo binário seedctl antes de chamar seedctl-btc ou seedctl-eth.
+//! Entropy option flow: mnemonic size, dice mode (auto/manual) selection.
+//!
+//! Called by the `seedctl` binary before dispatching to a chain crate.
 
 use console::style;
 use dialoguer::Select;
@@ -10,8 +11,13 @@ use crate::{
   utils::{generate_random_dice, read_manual_dice_with_feedback, required_dice},
 };
 
+/// Prompts the user to choose between 12-word (128-bit) and 24-word (256-bit)
+/// mnemonic sizes.
+///
+/// Returns the number of entropy bits required (`128` or `256`).
 fn mnemonic_bits() -> Result<i32, Box<dyn Error>> {
-  let mnemonic_choice = Select::with_theme(&dialoguer_theme("►"))
+  let theme = dialoguer_theme("►");
+  let mnemonic_choice = Select::with_theme(&theme)
     .with_prompt("Mnemonic size (seed):")
     .items(["12 words (128 bits)", "24 words (256 bits)"])
     .default(0)
@@ -25,12 +31,17 @@ fn mnemonic_bits() -> Result<i32, Box<dyn Error>> {
   Ok(bits)
 }
 
-/// Retorna (bits, sequência_dice, dice_mode).
-/// dice_mode: 0 = Auto (híbrido), 1 = Manual (determinístico).
+/// Guides the user through entropy configuration and returns
+/// `(bits, dice_sequence, dice_mode)`.
+///
+/// - `bits`: `128` or `256` — entropy size matching the chosen mnemonic length.
+/// - `dice_sequence`: raw dice values `[1, 6]` collected from user or RNG.
+/// - `dice_mode`: `0` = Auto/Hybrid (dice + system RNG), `1` = Manual/Deterministic.
 pub fn entropy_type() -> Result<(i32, Vec<u8>, usize), Box<dyn Error>> {
   let bits = mnemonic_bits()?;
 
-  let choice = Select::with_theme(&dialoguer_theme("►"))
+  let theme = dialoguer_theme("►");
+  let choice = Select::with_theme(&theme)
     .with_prompt("Entropy type:")
     .items(["Dice [1-6]"])
     .default(0)
@@ -40,7 +51,8 @@ pub fn entropy_type() -> Result<(i32, Vec<u8>, usize), Box<dyn Error>> {
     0 => {
       let min_dice = required_dice(bits as usize);
 
-      let dice_mode = Select::with_theme(&dialoguer_theme("►"))
+      let theme = dialoguer_theme("►");
+      let dice_mode = Select::with_theme(&theme)
         .with_prompt("DICE mode:")
         .items([
           "Auto (HYBRID (dice + system RNG))",

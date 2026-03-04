@@ -1,3 +1,18 @@
+//! Polygon (MATIC/POL) wallet derivation crate for `seedctl`.
+//!
+//! Polygon is EVM-compatible and shares the same derivation logic as Ethereum
+//! (`m/44'/60'/0'/0/x`). All heavy lifting is delegated to the shared
+//! [`seedctl_core::evm`] module via thin wrapper functions so that only the
+//! chain profile differs across EVM crates.
+//!
+//! Orchestrates the full interactive workflow:
+//!
+//! 1. Optional BIP-39 passphrase prompt.
+//! 2. Derivation-mode selection (generate addresses / scan common paths).
+//! 3. Address count, derivation style, and optional RPC URL prompts.
+//! 4. Account key derivation and address generation with optional balances.
+//! 5. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
@@ -17,10 +32,28 @@ use seedctl_core::{
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
+/// Runs the interactive Polygon wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Polygon (POL)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   let passphrase = prompt_passphrase()?;
   let master = master_from_mnemonic(mnemonic, &passphrase)?;
 
+  // Step 1 — choose between generating addresses and scanning common paths.
   let mode = prompts::select_derivation_mode()?;
   if mode == 1 {
     scanner::scan_common_paths(master)?;
@@ -42,6 +75,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   } else {
     Some(rpc::RpcClient::new(rpc_url.clone()))
   };
+  // Private keys are shown unconditionally; add a prompt here to make this configurable.
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -64,7 +98,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     let balance = rpc_client
       .as_ref()
       .and_then(|client| client.get_balance(&addr));
-    addresses.push((path_str.clone(), addr.clone(), balance));
+    addresses.push((path_str, addr, balance));
   }
 
   output::print_wallet_output(&output::WalletOutput {
@@ -75,6 +109,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     show_privkeys,
     addresses: &addresses,
   });
+
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
     let xpub_part = &export.keys.account_xpub[0..7];

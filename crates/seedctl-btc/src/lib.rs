@@ -1,3 +1,16 @@
+//! Bitcoin (BTC) wallet derivation crate for `seedctl`.
+//!
+//! Provides the [`run`] entry point called by the `seedctl` binary when the
+//! user selects the Bitcoin network. Orchestrates:
+//!
+//! 1. Network selection (Mainnet / Testnet).
+//! 2. Optional BIP-39 passphrase prompt.
+//! 3. BIP-32 master key derivation from the mnemonic.
+//! 4. BIP purpose / address type selection (BIP-84, BIP-49, BIP-44).
+//! 5. Account key pair and output descriptor assembly.
+//! 6. Address derivation with optional on-chain balance queries.
+//! 7. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
@@ -5,6 +18,23 @@ mod rpc;
 mod utils;
 mod wallet;
 
+/// Runs the interactive Bitcoin wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Bitcoin (BTC)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 use bip39::Mnemonic;
 use bitcoin::key::Secp256k1;
 use console::style;

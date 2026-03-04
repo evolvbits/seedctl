@@ -1,3 +1,19 @@
+//! Cardano (ADA) wallet derivation crate for `seedctl`.
+//!
+//! Implements the Icarus master-key derivation scheme (CIP-0003) on top of
+//! Byron-era derivation paths and CIP-1852 Shelley paths, producing
+//! bech32-encoded base addresses compatible with modern Cardano wallets
+//! (e.g. Yoroi, Eternl, Daedalus).
+//!
+//! Orchestrates the full interactive workflow:
+//!
+//! 1. Network selection (Mainnet / Testnet).
+//! 2. Optional BIP-39 passphrase prompt.
+//! 3. Icarus master key derivation from the mnemonic entropy.
+//! 4. Account key derivation at `m/1852'/1815'/0'` (CIP-1852).
+//! 5. Address generation with optional on-chain balance queries via Koios.
+//! 6. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
@@ -15,16 +31,35 @@ use seedctl_core::{
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
+/// Runs the interactive Cardano wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"Cardano (ADA)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bech32`, or filesystem error encountered
+/// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   let network = prompts::select_network()?;
   let passphrase = prompt_passphrase()?;
 
+  // Account 0 is the conventional default for Cardano wallets.
   let account_index = 0u32;
   let master = derive::master_from_mnemonic_icarus(mnemonic, &passphrase);
   let account = derive::derive_account(&master, account_index);
 
   let addr_count = prompts::prompt_address_count()?;
   let rpc_url = prompts::prompt_rpc_url()?;
+  // Private keys are shown unconditionally; add a prompt here to make this configurable.
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -38,11 +73,13 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
+  // Derive the first payment key to use as the "account xprv" in the display.
   let first_payment_xprv = derive::derive_payment_xprv(&account.account_xprv, 0);
   let first_secret_hex = hex::encode(first_payment_xprv.as_ref());
   let account_xpub_hex = hex::encode(account.account_xpub.as_ref());
 
   let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
+
   for i in 0..addr_count {
     let (_, address) = derive::keypair_and_address(&account, i, network)?;
     let balance = if rpc_url.is_empty() {

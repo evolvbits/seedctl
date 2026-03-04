@@ -1,3 +1,8 @@
+//! Entropy generation and resolution for BIP-39 mnemonic seeds.
+//!
+//! Provides abstractions for entropy sources, combining dice-based and
+//! system-random entropy, and printing the selected entropy mode.
+
 use console::style;
 use rand::RngExt;
 
@@ -6,10 +11,11 @@ use crate::utils::sha256_hash;
 
 /// Generic entropy provider abstraction.
 pub trait EntropySource {
+  /// Generates `bytes` random bytes from this source.
   fn generate(&self, bytes: usize) -> Result<Vec<u8>, SeedCtlError>;
 }
 
-/// System RNG‑based entropy source.
+/// System RNG-based entropy source backed by the OS CSPRNG.
 pub struct SystemEntropy;
 
 impl EntropySource for SystemEntropy {
@@ -19,16 +25,30 @@ impl EntropySource for SystemEntropy {
   }
 }
 
+/// Combines two entropy byte slices by hashing them together with SHA-256.
+///
+/// The explicit `as &[&[u8]]` cast triggers the array-to-slice unsizing
+/// coercion before the slice is passed to [`sha256_hash`].
 fn combine_entropy(a: &[u8], b: &[u8]) -> Vec<u8> {
-  sha256_hash(&[a, b])
+  sha256_hash(&[a, b] as &[&[u8]])
 }
 
+/// Truncates an entropy slice to the first `bits / 8` bytes.
 fn truncate_entropy(entropy: &[u8], bits: usize) -> Vec<u8> {
   entropy[..bits / 8].to_vec()
 }
 
-// Resolve entropia final: 0 = híbrido (dice + system), 1 = determinístico (só dice).
-// Retorna os bytes de entropia já truncados conforme `entropy_type.0` (bits).
+/// Resolves the final entropy bytes from a dice sequence.
+///
+/// - `dice_mode == 0`: **Hybrid** — mixes dice entropy with 32 bytes of
+///   system randomness via SHA-256, then truncates to `bits` bits.
+/// - `dice_mode == 1`: **Deterministic** — uses only the dice entropy,
+///   truncated to `bits` bits.
+///
+/// # Parameters
+/// - `entropy_type`: `(bits, dice_bytes, dice_mode)` tuple returned by
+///   [`crate::options::entropy_type`].
+/// - `dice_entropy`: pre-hashed dice bytes from [`crate::utils::dice_hash`].
 pub fn resolve_final_entropy(
   entropy_type: (i32, Vec<u8>, usize),
   dice_entropy: Vec<u8>,
@@ -47,25 +67,24 @@ pub fn resolve_final_entropy(
   }
 }
 
-/// Imprime a mensagem de modo de entropia (híbrido ou determinístico).
+/// Prints the active entropy mode label to stdout.
+///
+/// - `0` → **HYBRID** (dice + system RNG)
+/// - `1` → **DETERMINISTIC** (dice only)
 pub fn print_entropy_mode(dice_mode: usize) {
   match dice_mode {
-    0 => {
-      println!(
-        "{} {} {}",
-        style("✔").green().bold(),
-        style("Entropy mode:").bold(),
-        style("HYBRID (dice + system)").bold().green(),
-      );
-    }
-    1 => {
-      println!(
-        "{} {} {}",
-        style("✔").green().bold(),
-        style("Entropy mode: ").bold(),
-        style("DETERMINISTIC (dice only)").bold().green(),
-      );
-    }
+    0 => println!(
+      "{} {} {}",
+      style("✔").green().bold(),
+      style("Entropy mode:").bold(),
+      style("HYBRID (dice + system)").bold().green(),
+    ),
+    1 => println!(
+      "{} {} {}",
+      style("✔").green().bold(),
+      style("Entropy mode:").bold(),
+      style("DETERMINISTIC (dice only)").bold().green(),
+    ),
     _ => unreachable!(),
   }
 }

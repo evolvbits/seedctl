@@ -1,3 +1,17 @@
+//! Tron (TRX) wallet derivation crate for `seedctl`.
+//!
+//! Tron uses secp256k1 with Keccak-256 address encoding, prefixed with `0x41`
+//! and Base58Check-encoded to produce addresses starting with `T`. The
+//! derivation path follows `m/44'/195'/0'/0/x` (Standard) or
+//! `m/44'/195'/0'` (Ledger style).
+//!
+//! Orchestrates the full interactive workflow:
+//!
+//! 1. Optional BIP-39 passphrase prompt.
+//! 2. Address count, derivation style, and optional RPC URL prompts.
+//! 3. Account key derivation and address generation with optional balances.
+//! 4. Wallet display and optional watch-only JSON export.
+
 mod derive;
 mod output;
 mod prompts;
@@ -15,26 +29,39 @@ use seedctl_core::{
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
 
+/// Runs the interactive Tron wallet workflow.
+///
+/// Called by `seedctl`'s main dispatch loop after a BIP-39 mnemonic has been
+/// obtained (either freshly generated or imported by the user).
+///
+/// # Parameters
+///
+/// - `coin_name` — human-readable chain label shown in the wallet header
+///   (e.g. `"TRON (TRX)"`).
+/// - `mnemonic`  — validated BIP-39 mnemonic to derive keys from.
+/// - `info`      — software metadata slice `[name, version, repository]`
+///   written into the watch-only export JSON.
+///
+/// # Errors
+///
+/// Propagates any `dialoguer`, `bip32`, or filesystem error encountered
+/// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
-  // 3) (Opcional) no Tron consideramos apenas mainnet por enquanto,
-  // mas poderíamos adicionar um select_network aqui no futuro.
-
-  // 4) Passphrase opcional
   let passphrase = prompt_passphrase()?;
   let master = master_from_mnemonic(mnemonic, &passphrase)?;
 
-  // 5) Derivation path (Standard / Ledger / Custom)
+  // Step 1 — choose derivation style and collect configuration.
   let addr_count = prompts::prompt_address_count()?;
   let derivation_style = prompts::select_derivation_style()?;
   let rpc_url = prompts::prompt_rpc_url()?;
   let base_path = utils::style_to_string(&derivation_style);
 
-  // 6) Geração de chaves e endereços
+  // Step 2 — derive the account-level key pair.
   let account_xprv = utils::derive_from_path(master.clone(), &base_path)?;
   let account_xpub = account_xprv.public_key();
 
   let export = wallet::build_export(info, &base_path, account_xpub.clone())?;
-  // let show_privkeys = prompts::prompt_show_privkeys()?; // It asks if you want to show the private key.
+  // Private keys are shown unconditionally; add a prompt here to make this configurable.
   let show_privkeys = true;
 
   let go = prompt_confirm_options()?;
@@ -42,12 +69,14 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     exit(0);
   }
 
+  // Step 3 — display wallet header and mnemonic table.
   seedctl_core::ui::print_wallet_header(coin_name);
   print_mnemonic(
     mnemonic,
     &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
   );
 
+  // Step 4 — derive addresses and optionally query balances.
   let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
   for i in 0..addr_count {
     let (child, path_str) =
@@ -58,7 +87,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     } else {
       rpc::get_balance(&rpc_url, &addr)
     };
-    addresses.push((path_str.clone(), addr.clone(), balance));
+    addresses.push((path_str, addr, balance));
   }
 
   output::print_account_and_addresses(

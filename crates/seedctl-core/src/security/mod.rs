@@ -1,3 +1,14 @@
+//! Cold-wallet security warning screen.
+//!
+//! [`Security::warning`] renders a full-screen scrollable disclaimer that the
+//! user must read completely before being allowed to proceed. Once the bottom
+//! of the text is reached, the user is prompted to type a required confirmation
+//! phrase verbatim. Only an exact match unlocks the next step; pressing
+//! `Esc` or `Ctrl+C` at any point exits the process immediately.
+//!
+//! The screen is rendered in the terminal's **alternate buffer** so the
+//! disclaimer does not pollute the scrollback history.
+
 mod constants;
 
 use crate::security::constants::WARNING_TEXT;
@@ -12,9 +23,21 @@ use crossterm::{
 };
 use std::io::{self, Write};
 
+/// Renders the cold-wallet security disclaimer and enforces user confirmation.
+///
+/// Uses the terminal alternate screen and raw mode to display a scrollable
+/// full-screen warning. The user must scroll to the end and type the exact
+/// `required` confirmation phrase before the call returns successfully.
+///
+/// Pressing `Esc` or `Ctrl+C` at any point terminates the entire process
+/// via [`std::process::exit(0)`].
 pub struct Security;
 
 impl Security {
+  /// Restores the terminal to its normal state and optionally exits the process.
+  ///
+  /// Always disables raw mode and leaves the alternate screen. If `success` is
+  /// `false`, the process is terminated with exit code `0` (user aborted).
   fn cleanup_and_exit(&self, success: bool) {
     let _ = terminal::disable_raw_mode();
     let _ = execute!(io::stdout(), LeaveAlternateScreen);
@@ -23,6 +46,30 @@ impl Security {
     }
   }
 
+  /// Displays the full-screen security warning and waits for the user to
+  /// confirm by typing `required` exactly.
+  ///
+  /// # Behaviour
+  ///
+  /// 1. Enters the alternate screen buffer and enables raw mode.
+  /// 2. Renders the [`WARNING_TEXT`] paginated to the current terminal height.
+  /// 3. While the end of the text has not been reached, a scroll hint is shown
+  ///    at the bottom of the screen (`[V] Scroll down…`).
+  /// 4. Once the last line is visible, a confirmation prompt appears below the
+  ///    text asking the user to type `required` verbatim.
+  /// 5. An incorrect answer clears the input buffer and shows an inline error.
+  /// 6. A correct answer calls [`cleanup_and_exit(true)`] and returns `Ok(())`.
+  ///
+  /// # Errors
+  ///
+  /// Returns `Err` only if a crossterm I/O operation fails (e.g. the terminal
+  /// cannot be put into raw mode). In practice this should never happen on
+  /// supported platforms.
+  ///
+  /// # Panics
+  ///
+  /// Does not panic; all terminal operations use `?` or `let _ =` to suppress
+  /// non-critical failures.
   pub fn warning(&self, required: &str) -> io::Result<()> {
     let lines: Vec<&str> = WARNING_TEXT.lines().collect();
     let mut stdout = io::stdout();
@@ -38,9 +85,8 @@ impl Security {
     loop {
       let (term_width, term_height) = terminal::size()?;
 
-      // --- SPACE CONFIGURATION ---
-      // If it's at the end, we reserve 4 lines for the prompt (Error, Question, >, space).
-      // Otherwise, we'll reserve just 1 for the scroll bar.
+      // Reserve extra rows at the bottom for the confirmation prompt when the
+      // user has scrolled to the end; otherwise reserve only the scroll hint.
       let reserved_rows = if current_line + (term_height as usize) >= lines.len() {
         5
       } else {
@@ -54,9 +100,10 @@ impl Security {
         cursor::MoveTo(0, 0)
       )?;
 
-      // 1. Draw the Text
+      // ── Render the visible portion of the warning text ──────────────────
       for i in 0..display_height {
         if let Some(line) = lines.get(current_line + i) {
+          // Clamp to terminal width to avoid line wrapping artefacts.
           let line_to_print = if line.len() > term_width as usize {
             &line[..term_width as usize]
           } else {
@@ -68,13 +115,12 @@ impl Security {
 
       let is_at_end = current_line + display_height >= lines.len();
 
-      // 2. Dynamic Interface (Pasted into the text or background)
+      // ── Dynamic bottom UI ────────────────────────────────────────────────
       if is_at_end {
-        // If you've reached the end, the prompt appears just below the last line of the loop above.
-        // We use `println!` to ensure it starts on the next line.
+        // Blank line separating text from the prompt.
         write!(stdout, "\r\n")?;
 
-        // Question (?)
+        // Confirmation question.
         write!(
           stdout,
           "{} Type EXACTLY: {}\r\n",
@@ -82,10 +128,10 @@ impl Security {
           required.bold()
         )?;
 
-        // Input (>)
+        // Input line.
         write!(stdout, "{} {}", ">".cyan(), input_buffer)?;
 
-        // Error message (below the input, as in your screenshot)
+        // Inline error message displayed below the input on a wrong attempt.
         if error_msg {
           write!(
             stdout,
@@ -93,7 +139,7 @@ impl Security {
             "x".red().bold(),
             "Incorrect phrase.".red()
           )?;
-          // We move the cursor back to the line with the ">" to continue typing.
+          // Move cursor back to the input line so the user can keep typing.
           execute!(
             stdout,
             cursor::MoveUp(1),
@@ -101,7 +147,7 @@ impl Security {
           )?;
         }
       } else {
-        // While scrolling, the bar remains fixed at the BOTTOM of the window.
+        // Scroll hint fixed at the very bottom of the window.
         execute!(stdout, cursor::MoveTo(0, term_height.saturating_sub(1)))?;
         write!(
           stdout,
@@ -110,12 +156,14 @@ impl Security {
       }
       stdout.flush()?;
 
-      // 3. Keys
+      // ── Key event handling ───────────────────────────────────────────────
       if let Event::Key(key_event) = event::read()? {
+        // Ignore key-release and key-repeat events; only process key-press.
         if key_event.kind != KeyEventKind::Press {
           continue;
         }
 
+        // Global abort: Esc or Ctrl+C at any scroll position.
         if (key_event.code == KeyCode::Char('c')
           && key_event.modifiers.contains(KeyModifiers::CONTROL))
           || key_event.code == KeyCode::Esc
@@ -134,6 +182,8 @@ impl Security {
               input_buffer.pop();
             }
             KeyCode::Enter => {
+              // The first Enter that arrives when the end is newly reached is
+              // consumed without submitting, to avoid accidentally confirming.
               if !just_reached_end && !input_buffer.is_empty() {
                 if input_buffer == required {
                   break;
