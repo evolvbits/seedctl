@@ -1,3 +1,27 @@
+# Use the global `.gitignore` file according to your operating system:
+# - macOS taken from: https://github.com/github/gitignore/blob/main/Global/macOS.gitignore
+# - Windows taken from: https://github.com/github/gitignore/blob/main/Global/Windows.gitignore
+
+# Linux:
+*~
+
+# Vim:
+.*.sw[a-z]
+.netrwhist
+*.un~
+Session.vim
+
+# Python:
+.venv
+.env
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+__pypackages__/
+*.Identifier
+
+# SeedCTL project ignore:
 /target
 /temp
 /.idea
