@@ -9,7 +9,7 @@ build = "build.rs"
 
 [package.metadata]
 copyright_year = "2026"
-maintainer = "William C. Canin"
+maintainer = "EvolvBits Contributors"
 
 [dependencies]
 # Crates project
