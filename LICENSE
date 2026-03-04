@@ -1,21 +1,147 @@
-MIT License
+SEEDCTL — PROPRIETARY SOFTWARE LICENSE
+=======================================
 
-Copyright (c) 2026 - SeedCTL - William C. Canin
+Copyright (c) 2026 EvolvBits Contributors. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This license governs the use, copying, modification, and distribution of the
+SeedCTL software, including its source code, compiled binaries, documentation,
+configuration files, scripts, and all associated materials (collectively, the
+"Software").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. OWNERSHIP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The Software is the exclusive intellectual property of EvolvBits Contributors. All
+rights, title, and interest in and to the Software, including all intellectual
+property rights therein, remain solely and exclusively with EvolvBits Contributors. No
+ownership rights are transferred to any party under any circumstances.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. PERMITTED USE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Subject to the terms and conditions of this license, EvolvBits Contributors grants you
+a limited, non-exclusive, non-transferable, non-sublicensable, revocable
+permission solely to:
+
+  a) Download and execute the official pre-compiled binary releases of the
+     Software for your own personal, non-commercial use;
+
+  b) Read and inspect the source code for personal study, security auditing,
+     or evaluation purposes only, without exercising any of the rights
+     restricted in Section 3.
+
+Any use not expressly described in this section requires prior written
+authorization from the copyright holder.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. RESTRICTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Unless you have received explicit prior written permission from EvolvBits Contributors,
+you are strictly prohibited from:
+
+  a) Copying, reproducing, or duplicating the Software source code or binaries,
+     in whole or in part, in any medium or format;
+
+  b) Distributing, publishing, transmitting, uploading, or otherwise making
+     the Software — in source or binary form — available to any third party
+     through any channel, public or private;
+
+  c) Modifying, adapting, translating, patching, or creating derivative works
+     based on the Software or any portion thereof;
+
+  d) Reverse engineering, decompiling, disassembling, or otherwise attempting
+     to derive the source code from any compiled form of the Software;
+
+  e) Incorporating the Software, or any part thereof, into another product,
+     tool, service, or project, whether commercial or non-commercial;
+
+  f) Sublicensing, selling, renting, leasing, lending, or otherwise
+     transferring the Software or any rights in it to any third party;
+
+  g) Using the Software's name, branding, or associated trademarks to endorse
+     or promote products or services derived from or related to the Software,
+     without prior written consent;
+
+  h) Removing, altering, or obscuring any copyright notice, license text,
+     attribution statement, or proprietary marking present in or accompanying
+     the Software.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4. CONTRIBUTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Any contribution, suggestion, patch, or pull request submitted to the project
+by any party is considered a voluntary submission. By submitting a contribution,
+the contributor irrevocably assigns all intellectual property rights in that
+contribution to EvolvBits Contributors, without compensation or obligation of any kind.
+The copyright holder reserves the right to accept, reject, or incorporate
+contributions at their sole discretion.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. NO WARRANTIES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+FITNESS FOR A PARTICULAR PURPOSE, CORRECTNESS, SECURITY, OR NON-INFRINGEMENT.
+EvolvBits CONTRIBUTORS DOES NOT WARRANT THAT THE SOFTWARE WILL BE ERROR-FREE,
+UNINTERRUPTED, OR FREE OF SECURITY VULNERABILITIES.
+
+THE ENTIRE RISK AS TO THE QUALITY, ACCURACY, AND PERFORMANCE OF THE SOFTWARE
+IS WITH YOU. THIS SOFTWARE HANDLES CRYPTOGRAPHIC MATERIAL INCLUDING MNEMONIC
+PHRASES AND PRIVATE KEYS. YOU ASSUME FULL RESPONSIBILITY FOR ALL OUTCOMES
+RESULTING FROM ITS USE.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6. LIMITATION OF LIABILITY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+IN NO EVENT SHALL EvolvBits CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, PUNITIVE, OR CONSEQUENTIAL DAMAGES OF ANY
+KIND, INCLUDING BUT NOT LIMITED TO LOSS OF FUNDS, LOSS OF PRIVATE KEYS, LOSS
+OF DATA, LOSS OF PROFITS, LOSS OF BUSINESS, OR ANY OTHER FINANCIAL OR
+OPERATIONAL LOSS, ARISING OUT OF OR IN CONNECTION WITH THE USE, MISUSE, OR
+INABILITY TO USE THE SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGES AND REGARDLESS OF THE THEORY OF LIABILITY (CONTRACT, TORT, STRICT
+LIABILITY, OR OTHERWISE).
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7. TERMINATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The limited permissions granted under Section 2 terminate automatically and
+immediately, without notice, upon any violation of the restrictions set out in
+Section 3. Upon termination, you must immediately cease all use of the Software
+and permanently destroy all copies of the Software, its source code, and any
+derivative materials in your possession or control.
+
+EvolvBits Contributors reserves the right to revoke the permissions granted under
+Section 2 at any time, for any reason, with or without notice.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8. GOVERNING LAW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+This license shall be governed by and construed in accordance with the laws of
+the jurisdiction of the copyright holder's residence, without regard to its
+conflict of law provisions. Any disputes arising under or in connection with
+this license shall be subject to the exclusive jurisdiction of the courts of
+that jurisdiction.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+9. CONTACT AND PERMISSIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+To request authorization for any use not permitted by Section 2, or for any
+commercial licensing inquiry, contact the copyright holder through the official
+project repository:
+
+  GitHub : https://github.com/evolvbits/seedctl
+  GitLab : https://gitlab.com/evolvbits/seedctl
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Copyright (c) 2026 EvolvBits Contributors. All rights reserved.
