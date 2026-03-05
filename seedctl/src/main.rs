@@ -92,8 +92,8 @@ fn main() -> Result<(), Box<dyn Error>> {
           "BNB (BNB Smart Chain, EVM)",
           "XRP (XRP Ledger)",
           "Tron (TRX + TRC20 tokens)",
-          "Solana (SOL + SPL tokens)", // BUGFIX: Address being generated incorrectly.
-          "Litecoin (LTC)", // BUGFIX: Address being generated incorrectly.
+          "Solana (SOL + SPL tokens)", // BUGFIX: Address being generated incorrectly (#4)
+          "Litecoin (LTC)", // BUGFIX: Address being generated incorrectly (#4)
           "Polygon (MATIC, EVM)",
           "Cardano (ADA)",
           "Monero (XMR)", // BUGFIX: Address being generated incorrectly.
