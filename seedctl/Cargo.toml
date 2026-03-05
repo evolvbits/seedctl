@@ -9,7 +9,7 @@ build = "build.rs"
 
 [package.metadata]
 copyright_year = "2026"
-maintainer = "EvolvBits Contributors"
+maintainer = "EvolvBits"
 
 [dependencies]
 # Crates project
