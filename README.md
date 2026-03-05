@@ -18,9 +18,9 @@ The full and up-to-date documentation is hosted at:
 
 - **Docs Hub**: https://evolvbits.github.io/seedctl/docs/
 - **Security**: https://evolvbits.github.io/seedctl/docs/#security/
-- **Disclaimer**: https://evolvbits.github.io/docs/#disclaimer/
-- **Reproducibility**: https://evolvbits.github.io/docs/#reproducibility/
-- **Terms of Use**: https://evolvbits.github.io/docs/#terms/
+- **Disclaimer**: https://evolvbits.github.io/seedctl/docs/#disclaimer/
+- **Reproducibility**: https://evolvbits.github.io/seedctl/docs/#reproducibility/
+- **Terms of Use**: https://evolvbits.github.io/seedctl/docs/#terms/
 
 ## Repository
 
