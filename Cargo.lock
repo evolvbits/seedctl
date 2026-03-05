@@ -1829,7 +1829,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip39",
  "console",
@@ -1852,7 +1852,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-ada"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bech32",
  "bip39",
@@ -1870,7 +1870,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-bnb"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
@@ -1882,7 +1882,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-btc"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip39",
  "bitcoin",
@@ -1895,7 +1895,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-core"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
@@ -1915,7 +1915,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-eth"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
@@ -1927,7 +1927,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-ltc"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bech32",
  "bip32",
@@ -1945,7 +1945,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-matic"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
@@ -1957,7 +1957,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-sol"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip39",
  "bs58",
@@ -1973,7 +1973,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-trx"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
@@ -1990,7 +1990,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-xmr"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip39",
  "console",
@@ -2005,7 +2005,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-xrp"
-version = "0.2.1"
+version = "0.2.2"
 dependencies = [
  "bip32",
  "bip39",
