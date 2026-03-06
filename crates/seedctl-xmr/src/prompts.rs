@@ -8,6 +8,30 @@ use dialoguer::{Input, Select};
 use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
+/// Monero key-derivation mode used from an imported BIP-39 mnemonic.
+#[derive(Clone, Copy)]
+pub enum XmrDerivationMode {
+  /// Native Monero-style mapping: `spend = Hs(bip39_seed_64)`.
+  Native,
+  /// Compatibility mode aligned with WalletCore / Trust Wallet imports.
+  ///
+  /// Derives a 32-byte key at `m/44'/128'/0'/0'/0'` via SLIP-0010 Ed25519 and
+  /// uses it directly as the spend scalar basis.
+  WalletCore,
+}
+
+/// Prompts the user to choose between generating addresses and scanning common
+/// Monero derivation profiles.
+pub fn select_operation_mode() -> Result<usize, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select derivation mode (Monero):")
+    .items(["Generate addresses", "Scan common derivation paths"])
+    .default(0)
+    .interact()?;
+
+  Ok(choice)
+}
+
 /// Monero network variant — determines the address prefix bytes used during
 /// encoding.
 #[derive(Clone, Copy)]
@@ -78,6 +102,24 @@ pub fn select_network() -> Result<XmrNetwork, Box<dyn Error>> {
   Ok(match choice {
     0 => XmrNetwork::Mainnet,
     1 => XmrNetwork::Testnet,
+    _ => unreachable!(),
+  })
+}
+
+/// Prompts the user to choose how Monero keys should be derived from BIP-39.
+pub fn select_derivation_mode() -> Result<XmrDerivationMode, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select Monero derivation mode:")
+    .items([
+      "Native Monero from BIP39 seed (legacy seedctl default)",
+      "WalletCore / Trust Wallet compatibility",
+    ])
+    .default(1)
+    .interact()?;
+
+  Ok(match choice {
+    0 => XmrDerivationMode::Native,
+    1 => XmrDerivationMode::WalletCore,
     _ => unreachable!(),
   })
 }

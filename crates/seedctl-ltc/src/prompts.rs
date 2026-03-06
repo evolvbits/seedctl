@@ -8,6 +8,41 @@ use dialoguer::{Input, Select};
 use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
+/// Supported Litecoin derivation/address styles.
+#[derive(Clone, Copy)]
+pub enum LtcDerivationStyle {
+  /// Native SegWit bech32 `ltc1...` (BIP-84).
+  BIP84,
+  /// Legacy Base58 `L...` / `m...` (BIP-44).
+  BIP44,
+}
+
+impl LtcDerivationStyle {
+  /// Returns BIP purpose for the selected style.
+  pub fn purpose(self) -> u32 {
+    match self {
+      Self::BIP84 => 84,
+      Self::BIP44 => 44,
+    }
+  }
+
+  /// Returns export script type label.
+  pub fn script_type(self) -> &'static str {
+    match self {
+      Self::BIP84 => "bip84",
+      Self::BIP44 => "bip44",
+    }
+  }
+
+  /// Returns descriptor label used in display/export.
+  pub fn descriptor(self) -> &'static str {
+    match self {
+      Self::BIP84 => "ltc-bip84",
+      Self::BIP44 => "ltc-bip44",
+    }
+  }
+}
+
 /// Litecoin network variant — determines the bech32 HRP and SLIP-44 coin type.
 #[derive(Clone, Copy)]
 pub enum LtcNetwork {
@@ -39,6 +74,24 @@ pub fn select_network() -> Result<(LtcNetwork, u32), Box<dyn Error>> {
   Ok(match choice {
     0 => (LtcNetwork::Mainnet, 2),
     1 => (LtcNetwork::Testnet, 1),
+    _ => unreachable!(),
+  })
+}
+
+/// Prompts the user to choose Litecoin derivation/address style.
+pub fn select_derivation_style() -> Result<LtcDerivationStyle, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select Litecoin derivation style:")
+    .items([
+      "Native SegWit BIP84 (m/84'/2'/0'/0/x, ltc1...)",
+      "Legacy BIP44 (m/44'/2'/0'/0/x, L...)",
+    ])
+    .default(0)
+    .interact()?;
+
+  Ok(match choice {
+    0 => LtcDerivationStyle::BIP84,
+    1 => LtcDerivationStyle::BIP44,
     _ => unreachable!(),
   })
 }

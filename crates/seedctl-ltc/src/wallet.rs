@@ -59,6 +59,11 @@ pub fn build_export(output: &BuildExport<'_>) -> export::WalletExport {
     LtcNetwork::Testnet => "litecoin-testnet",
   };
 
+  let descriptor = match output.script_type {
+    "bip44" => "ltc-bip44",
+    _ => "ltc-bip84",
+  };
+
   export::WalletExport {
     software: export::SoftwareInfo {
       name: output.info[0].to_string(),
@@ -79,9 +84,8 @@ pub fn build_export(output: &BuildExport<'_>) -> export::WalletExport {
       account_xprv: None,
     },
     descriptors: export::Descriptors {
-      // Litecoin BIP-84 uses P2WPKH (bech32 ltc1... addresses).
-      receive: "ltc-bip84".into(),
-      change: "ltc-bip84".into(),
+      receive: descriptor.into(),
+      change: descriptor.into(),
     },
   }
 }

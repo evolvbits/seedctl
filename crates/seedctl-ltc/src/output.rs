@@ -12,6 +12,9 @@ use seedctl_core::ui::{AddressRows, print_standard_wallet};
 /// Assembled in [`crate::run`] after BIP-84 key derivation and address
 /// generation, then passed to [`print_wallet_output`] for display.
 pub struct WalletOutput<'a> {
+  /// BIP purpose used in derivation path headers (`84` or `44`).
+  pub purpose: u32,
+
   /// SLIP-44 coin type used in the derivation path header.
   ///
   /// - `2` for Litecoin Mainnet.
@@ -30,11 +33,13 @@ pub struct WalletOutput<'a> {
   /// secp256k1 point).
   pub account_xpub: &'a str,
 
-  /// Derived bech32 P2WPKH receive addresses with optional on-chain LTC
-  /// balances.
+  /// Derived Litecoin receive addresses with optional on-chain LTC balances.
   ///
   /// Each entry is `(derivation_path, ltc1_address, optional_balance_ltc)`.
   pub addresses: &'a [(String, String, Option<f64>)],
+
+  /// Descriptor label shown for receive/change.
+  pub descriptor: &'a str,
 }
 
 /// Renders the full Litecoin wallet section to stdout.
@@ -50,16 +55,15 @@ pub struct WalletOutput<'a> {
 pub fn print_wallet_output(output: &WalletOutput<'_>) {
   print_standard_wallet(
     "Litecoin Wallet",
-    // BIP-84: Native SegWit (P2WPKH) purpose.
-    84,
+    output.purpose,
     output.coin_type,
     Some(output.fingerprint),
     Some(output.account_xprv),
     output.account_xpub,
     AddressRows::WithBalance(output.addresses),
     vec![
-      ("Output Descriptor (receive):", "ltc-bip84"),
-      ("Output Descriptor (change):", "ltc-bip84"),
+      ("Output Descriptor (receive):", output.descriptor),
+      ("Output Descriptor (change):", output.descriptor),
     ],
   );
 }

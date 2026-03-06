@@ -18,6 +18,9 @@ pub const CARDANO_COIN_TYPE: u32 = 1815u32;
 /// SLIP-44 coin type for Monero (XMR).
 pub const MONERO_COIN_TYPE: u32 = 128u32;
 
+/// SLIP-44 coin type for Solana (SOL).
+pub const SOLANA_COIN_TYPE: u32 = 501u32;
+
 /// SLIP-44 coin type for XRP Ledger (XRP).
 pub const XRP_COIN_TYPE: u32 = 144u32;
 

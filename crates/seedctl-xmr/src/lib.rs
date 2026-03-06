@@ -58,11 +58,19 @@ use std::{error::Error, fs, process::exit};
 /// during the interactive session.
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   let network = prompts::select_network()?;
+  let operation_mode = prompts::select_operation_mode()?;
   let passphrase = prompt_passphrase()?;
   let seed = mnemonic.to_seed(&passphrase);
 
-  // Derive the Monero wallet keys from the BIP-39 seed.
-  let wallet = derive::wallet_from_bip39_seed(&seed);
+  if operation_mode == 1 {
+    scan_common_paths(&seed, network)?;
+    return Ok(());
+  }
+
+  let derivation_mode = prompts::select_derivation_mode()?;
+
+  // Derive Monero wallet keys using the selected BIP-39 compatibility mode.
+  let wallet = derive::wallet_from_bip39_seed(&seed, derivation_mode);
 
   let addr_count = prompts::prompt_address_count()?;
   let rpc_url = prompts::prompt_rpc_url()?;
@@ -118,5 +126,31 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     );
   }
 
+  Ok(())
+}
+
+fn scan_common_paths(seed: &[u8], network: prompts::XmrNetwork) -> Result<(), Box<dyn Error>> {
+  let profiles = [
+    (
+      "native-hs(seed)",
+      prompts::XmrDerivationMode::Native,
+      [0u32, 1u32, 2u32],
+    ),
+    (
+      "walletcore m/44'/128'/0'/0'/0'",
+      prompts::XmrDerivationMode::WalletCore,
+      [0u32, 1u32, 2u32],
+    ),
+  ];
+
+  println!("\n🔎 Scanning common Monero derivation profiles:\n");
+  for (label, mode, indices) in profiles {
+    let wallet = derive::wallet_from_bip39_seed(seed, mode);
+    for index in indices {
+      let derived = derive::derive_address(&wallet, network, index);
+      println!("{:<33} {:<22} → {}", label, derived.path, derived.address);
+    }
+  }
+  println!("\nTip: compare with your known wallet address to find the right profile.");
   Ok(())
 }

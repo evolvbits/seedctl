@@ -5,13 +5,13 @@
 //! bech32-encoded Litecoin receive addresses (`ltc1…` on Mainnet, `tltc1…`
 //! on Testnet).
 
-use bech32::{Bech32, Hrp};
+use bech32::Hrp;
 use bip32::{ChildNumber, DerivationPath, XPrv, XPub};
 use ripemd::Ripemd160;
 use sha2::{Digest as ShaDigest, Sha256};
 use std::error::Error;
 
-use crate::prompts::LtcNetwork;
+use crate::prompts::{LtcDerivationStyle, LtcNetwork};
 
 /// Derives the account-level key pair at `m/84'/<coin_type>'/0'`.
 ///
@@ -35,8 +35,9 @@ use crate::prompts::LtcNetwork;
 pub fn derive_account(
   master: &XPrv,
   coin_type: u32,
+  purpose: u32,
 ) -> Result<(XPrv, XPub, [u8; 4]), Box<dyn Error>> {
-  let account_path: DerivationPath = format!("m/84'/{}'/0'", coin_type).parse()?;
+  let account_path: DerivationPath = format!("m/{purpose}'/{coin_type}'/0'").parse()?;
   let account_xprv = derive_path(master.clone(), &account_path)?;
   let account_xpub = account_xprv.public_key();
   let fingerprint = XPub::from(master).fingerprint();
@@ -70,6 +71,8 @@ pub fn receive_addresses(
   account_xprv: &XPrv,
   network: LtcNetwork,
   coin_type: u32,
+  purpose: u32,
+  style: LtcDerivationStyle,
   count: u32,
 ) -> Result<Vec<(String, String)>, Box<dyn Error>> {
   let mut out = Vec::with_capacity(count as usize);
@@ -84,9 +87,12 @@ pub fn receive_addresses(
 
     let signing = k256::ecdsa::SigningKey::from_bytes(&xprv.private_key().to_bytes())?;
     let pubkey = signing.verifying_key().to_encoded_point(true);
-    let addr = ltc_bech32_p2wpkh(pubkey.as_bytes(), network)?;
+    let addr = match style {
+      LtcDerivationStyle::BIP84 => ltc_bech32_p2wpkh(pubkey.as_bytes(), network)?,
+      LtcDerivationStyle::BIP44 => ltc_legacy_p2pkh(pubkey.as_bytes(), network),
+    };
 
-    out.push((format!("m/84'/{}'/0'/0/{}", coin_type, i), addr));
+    out.push((format!("m/{purpose}'/{coin_type}'/0'/0/{i}"), addr));
   }
 
   Ok(out)
@@ -110,8 +116,8 @@ fn derive_path(mut key: XPrv, path: &DerivationPath) -> Result<XPrv, Box<dyn Err
 /// Encodes a compressed public key as a bech32 P2WPKH address for Litecoin.
 ///
 /// Applies SHA-256 followed by RIPEMD-160 to produce the 20-byte witness
-/// program, prepends the SegWit version byte (`0x00`), and encodes the result
-/// as a bech32 string using the network-appropriate HRP.
+/// program and encodes it as a SegWit v0 bech32 string using the
+/// network-appropriate HRP.
 ///
 /// # Parameters
 ///
@@ -129,15 +135,75 @@ fn ltc_bech32_p2wpkh(
   let sha = Sha256::digest(pubkey_compressed);
   let rip = Ripemd160::digest(sha);
 
-  // Prepend SegWit version byte 0x00 before the 20-byte key hash.
-  let mut program = Vec::with_capacity(1 + rip.len());
-  program.push(0u8);
-  program.extend_from_slice(&rip);
-
   let hrp = match network {
     LtcNetwork::Mainnet => "ltc",
     LtcNetwork::Testnet => "tltc",
   };
 
-  Ok(bech32::encode::<Bech32>(Hrp::parse(hrp)?, &program)?)
+  // Use the segwit-specific encoder for witness-v0 addresses.
+  Ok(bech32::segwit::encode_v0(Hrp::parse(hrp)?, &rip)?)
+}
+
+/// Encodes a compressed public key as a legacy Litecoin P2PKH Base58Check
+/// address (`L...` on mainnet).
+fn ltc_legacy_p2pkh(pubkey_compressed: &[u8], network: LtcNetwork) -> String {
+  let sha = Sha256::digest(pubkey_compressed);
+  let rip = Ripemd160::digest(sha);
+
+  // Version byte for P2PKH.
+  let version = match network {
+    LtcNetwork::Mainnet => 0x30u8, // L...
+    LtcNetwork::Testnet => 0x6fu8, // m... / n...
+  };
+
+  let mut payload = Vec::with_capacity(1 + rip.len() + 4);
+  payload.push(version);
+  payload.extend_from_slice(&rip);
+
+  // Base58Check checksum = first 4 bytes of SHA256(SHA256(version||hash160)).
+  let checksum = Sha256::digest(Sha256::digest(&payload));
+  payload.extend_from_slice(&checksum[..4]);
+
+  bs58::encode(payload).into_string()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{derive_account, ltc_bech32_p2wpkh, receive_addresses};
+  use crate::prompts::{LtcDerivationStyle, LtcNetwork};
+  use bip39::Mnemonic;
+  use seedctl_core::utils::master_from_mnemonic_bip32;
+
+  #[test]
+  fn bech32_address_shape_is_valid() {
+    // Compressed secp256k1 pubkey.
+    let pubkey = hex::decode("0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798")
+      .expect("valid hex");
+    let addr = ltc_bech32_p2wpkh(&pubkey, LtcNetwork::Mainnet).expect("encode bech32");
+    assert!(addr.starts_with("ltc1q"));
+    assert!(addr.len() >= 40 && addr.len() <= 62);
+  }
+
+  #[test]
+  fn trust_wallet_vector_matches_bip84() {
+    let phrase = "lift find file planet grow remain steel rude arrive curve congress outer";
+    let mnemonic = Mnemonic::parse(phrase).expect("valid mnemonic");
+    let master = master_from_mnemonic_bip32(&mnemonic, "").expect("master key");
+    let (account_xprv, _, _) = derive_account(&master, 2, 84).expect("account derivation");
+
+    let addresses = receive_addresses(
+      &account_xprv,
+      LtcNetwork::Mainnet,
+      2,
+      84,
+      LtcDerivationStyle::BIP84,
+      1,
+    )
+    .expect("receive addresses");
+
+    assert_eq!(
+      addresses[0].1,
+      "ltc1q0emsz6raagvzstd3tww0hz0wm3w50cpc52rvv7"
+    );
+  }
 }

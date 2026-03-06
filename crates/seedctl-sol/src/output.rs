@@ -11,16 +11,10 @@ use seedctl_core::ui::{AddressRows, print_standard_wallet};
 /// Assembled in [`crate::run`] after SLIP-0010 Ed25519 key derivation and
 /// address generation, then passed to [`print_wallet_output`] for display.
 pub struct WalletOutput<'a> {
-  /// Coin type used in the derivation path label (BIP-44 = `44`).
-  ///
-  /// Note: this field is repurposed here — Solana uses `501` as its SLIP-44
-  /// coin type, but the display layer needs a numeric label for the path
-  /// header. The convention in this crate is to pass `ETHEREUM_COIN_TYPE`
-  /// (60) for the purpose and `BIP44` (44) for the coin_type field; the
-  /// actual path `m/44'/501'/<index>'/0'` is encoded per address row.
+  /// BIP-44 purpose value (`44`) used in derivation-path headers.
   pub purpose: u32,
 
-  /// Purpose field used in the derivation path header display.
+  /// SLIP-44 coin type used in derivation-path headers (`501` for Solana).
   pub coin_type: u32,
 
   /// Hex-encoded first account signing key (32-byte Ed25519 private scalar).

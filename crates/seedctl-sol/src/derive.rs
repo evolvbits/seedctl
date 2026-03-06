@@ -7,20 +7,15 @@
 use ed25519_dalek::SigningKey;
 use std::error::Error;
 
-use crate::utils::{derive_seed, pubkey_to_address};
+use crate::utils::{derive_seed_from_path, pubkey_to_address};
 
 /// Derives an Ed25519 signing key and the corresponding Solana address for
-/// the given BIP-39 seed and account index.
-///
-/// # Derivation path
-///
-/// Uses `m/44'/501'/<index>'/0'` (fully hardened), which is compatible with
-/// Phantom, Solflare, and the Solana CLI.
+/// the given BIP-39 seed and derivation path.
 ///
 /// # Parameters
 ///
 /// - `seed`  — 64-byte BIP-39 seed produced by `Mnemonic::to_seed(passphrase)`.
-/// - `index` — account index; maps to the third path component (`<index>'`).
+/// - `path`  — full derivation path, e.g. `"m/44'/501'/0'/0'"`.
 ///
 /// # Returns
 ///
@@ -36,9 +31,9 @@ use crate::utils::{derive_seed, pubkey_to_address};
 /// template.
 pub fn keypair_and_address(
   seed: &[u8],
-  index: u32,
+  path: &str,
 ) -> Result<(SigningKey, String), Box<dyn Error>> {
-  let seed_32 = derive_seed(seed, index)?;
+  let seed_32 = derive_seed_from_path(seed, path)?;
   let signing_key = SigningKey::from_bytes(&seed_32);
   let verifying = signing_key.verifying_key();
   let addr = pubkey_to_address(verifying.as_bytes());

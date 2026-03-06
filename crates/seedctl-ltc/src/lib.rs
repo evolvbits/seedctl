@@ -51,6 +51,8 @@ use std::{error::Error, fs, process::exit};
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   // Step 1 — choose Mainnet or Testnet; coin_type follows SLIP-44.
   let (network, coin_type) = prompts::select_network()?;
+  let derivation_style = prompts::select_derivation_style()?;
+  let purpose = derivation_style.purpose();
 
   // Step 2 — optional BIP-39 passphrase.
   let passphrase = prompt_passphrase()?;
@@ -58,11 +60,12 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   // Step 3 — derive the BIP-32 master key from the mnemonic + passphrase.
   let master = master_from_mnemonic_bip32(mnemonic, &passphrase)?;
 
-  // Step 4 — derive the account-level key pair at m/84'/<coin_type>'/0'.
-  let (account_xprv, account_xpub, fingerprint) = derive::derive_account(&master, coin_type)?;
+  // Step 4 — derive the account-level key pair at m/<purpose>'/<coin_type>'/0'.
+  let (account_xprv, account_xpub, fingerprint) =
+    derive::derive_account(&master, coin_type, purpose)?;
   let account_xprv_hex = hex::encode(account_xprv.to_bytes());
   let account_xpub_hex = hex::encode(account_xpub.to_bytes());
-  let derivation_path = format!("m/84'/{}'/0'", coin_type);
+  let derivation_path = format!("m/{purpose}'/{coin_type}'/0'");
 
   let go_continue = prompt_confirm_options()?;
   if go_continue == 1 {
@@ -80,7 +83,14 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   );
 
   // Step 7 — derive receive addresses and optionally query balances.
-  let receive_addresses = derive::receive_addresses(&account_xprv, network, coin_type, 10)?;
+  let receive_addresses = derive::receive_addresses(
+    &account_xprv,
+    network,
+    coin_type,
+    purpose,
+    derivation_style,
+    10,
+  )?;
   let mut addresses: Vec<(String, String, Option<f64>)> =
     Vec::with_capacity(receive_addresses.len());
 
@@ -95,18 +105,20 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
 
   // Step 8 — render the wallet section to the terminal.
   output::print_wallet_output(&output::WalletOutput {
+    purpose,
     coin_type,
     fingerprint: &fingerprint,
     account_xprv: &account_xprv_hex,
     account_xpub: &account_xpub_hex,
     addresses: &addresses,
+    descriptor: derivation_style.descriptor(),
   });
 
   // Step 9 — assemble the watch-only export document.
   let export = wallet::build_export(&wallet::BuildExport {
     info,
     network,
-    script_type: "bip84",
+    script_type: derivation_style.script_type(),
     derivation_path: &derivation_path,
     fingerprint: &fingerprint,
     account_xpub: &account_xpub_hex,

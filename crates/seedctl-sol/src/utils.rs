@@ -7,34 +7,107 @@
 //! - [`prompt_rpc_url`]      — optionally asks for a Solana RPC URL for balance queries.
 //! - [`prompt_show_privkeys`] — optionally asks whether to display private keys (currently unused).
 
-use dialoguer::Input;
+use dialoguer::{Input, Select};
 use ed25519_hd_key::derive_from_path;
 use seedctl_core::{constants::RPC_URL_ENABLE, ui::dialoguer_theme};
 use std::error::Error;
 
-/// Derives a 32-byte Ed25519 private scalar for the given account `index`
-/// using BIP-32 SLIP-0010 with the path `m/44'/501'/<index>'/0'`.
-///
-/// This path is compatible with Phantom, Solflare, and the Solana CLI.
-///
-/// # Parameters
-///
-/// - `seed`  — 64-byte BIP-39 seed produced by `Mnemonic::to_seed(passphrase)`.
-/// - `index` — account index that maps to the third path component (`<index>'`).
-///
-/// # Returns
-///
-/// A 32-byte array containing the derived Ed25519 private scalar.
-///
-/// # Errors
-///
-/// Returns a boxed error if the path string is malformed (should never happen
-/// given the hardcoded path template) or if the underlying SLIP-0010
-/// derivation fails.
-pub fn derive_seed(seed: &[u8], index: u32) -> Result<[u8; 32], Box<dyn Error>> {
-  // Path m/44'/501'/<index>'/0' is fully hardened, as required by SLIP-0010
-  // for Ed25519 keys (unhardened Ed25519 derivation is not defined).
-  let path = format!("m/44'/501'/{}'/0'", index);
+/// Standard Solana path used by Phantom, Solflare, and Solana CLI.
+const SOL_STANDARD_PATH: &str = "m/44'/501'/{index}'/0'";
+
+/// WalletCore-style path where account index is the last hardened component.
+const SOL_WALLETCORE_PATH: &str = "m/44'/501'/0'/0'/{index}'";
+
+/// Legacy shorter path used by some old Solana tooling.
+const SOL_LEGACY_PATH: &str = "m/44'/501'/{index}'";
+
+/// Common Solana derivation path candidates for scanner mode.
+const SOL_SCAN_PATHS: &[&str] = &[
+  "m/44'/501'/0'/0'",
+  "m/44'/501'/1'/0'",
+  "m/44'/501'/0'",
+  "m/44'/501'/1'",
+  "m/44'/501'/0'/0'/0'",
+  "m/44'/501'/0'/0'/1'",
+  "m/44'/501'/0'/1'",
+];
+
+/// Supported derivation path styles for Solana wallets.
+#[derive(Clone)]
+pub enum DerivationStyle {
+  /// `m/44'/501'/<index>'/0'` (Phantom / Solflare / Solana CLI).
+  Standard,
+  /// `m/44'/501'/0'/0'/<index>'` (WalletCore-compatible profile).
+  WalletCore,
+  /// `m/44'/501'/<index>'` (legacy profile).
+  Legacy,
+  /// Custom path template. `{index}` placeholder is supported.
+  Custom(String),
+}
+
+/// Prompts the user to choose between generating addresses and scanning common
+/// derivation paths.
+pub fn select_derivation_mode() -> Result<usize, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select derivation mode (Solana):")
+    .items(["Generate addresses", "Scan common derivation paths"])
+    .default(0)
+    .interact()?;
+  Ok(choice)
+}
+
+/// Prompts the user to choose a Solana derivation style.
+pub fn select_derivation_style() -> Result<DerivationStyle, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select Solana derivation style:")
+    .items([
+      "Standard (m/44'/501'/<index>'/0')",
+      "WalletCore style (m/44'/501'/0'/0'/<index>')",
+      "Legacy (m/44'/501'/<index>')",
+      "Custom path",
+    ])
+    .default(0)
+    .interact()?;
+
+  Ok(match choice {
+    0 => DerivationStyle::Standard,
+    1 => DerivationStyle::WalletCore,
+    2 => DerivationStyle::Legacy,
+    3 => {
+      let input: String = Input::with_theme(&dialoguer_theme("►"))
+        .with_prompt("Enter custom derivation path template")
+        .default(SOL_STANDARD_PATH.into())
+        .interact_text()?;
+      DerivationStyle::Custom(input)
+    }
+    _ => unreachable!(),
+  })
+}
+
+/// Builds the full derivation path string for `index` and `style`.
+pub fn path_for_index(style: &DerivationStyle, index: u32) -> String {
+  let template = match style {
+    DerivationStyle::Standard => SOL_STANDARD_PATH,
+    DerivationStyle::WalletCore => SOL_WALLETCORE_PATH,
+    DerivationStyle::Legacy => SOL_LEGACY_PATH,
+    DerivationStyle::Custom(custom) => custom.as_str(),
+  };
+
+  if template.contains("{index}") {
+    template.replace("{index}", &index.to_string())
+  } else {
+    template.to_string()
+  }
+}
+
+/// Returns the list of common path candidates used by scanner mode.
+pub fn common_scan_paths() -> &'static [&'static str] {
+  SOL_SCAN_PATHS
+}
+
+/// Derives a 32-byte Ed25519 private scalar for `path`.
+pub fn derive_seed_from_path(seed: &[u8], path: &str) -> Result<[u8; 32], Box<dyn Error>> {
+  // SLIP-0010 Ed25519 supports hardened derivation only.
   let (private_key, _chain_code) = derive_from_path(&path, seed);
   Ok(private_key)
 }

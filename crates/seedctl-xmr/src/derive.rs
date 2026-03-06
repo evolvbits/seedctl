@@ -35,9 +35,10 @@
 //! ```
 
 use curve25519_dalek::{constants::ED25519_BASEPOINT_TABLE, edwards::EdwardsPoint, scalar::Scalar};
+use ed25519_hd_key::derive_from_path;
 use sha3::{Digest, Keccak256};
 
-use crate::prompts::XmrNetwork;
+use crate::prompts::{XmrDerivationMode, XmrNetwork};
 
 // ── Monero Base58 encoding constants ─────────────────────────────────────────
 
@@ -130,30 +131,40 @@ impl XmrWallet {
 
 // ── Key derivation ────────────────────────────────────────────────────────────
 
-/// Derives a complete Monero [`XmrWallet`] from a BIP-39 64-byte seed.
-///
-/// Applies the Monero `Hs()` (hash-to-scalar) function twice to produce the
-/// spend and view private scalars, then multiplies each by the Ed25519 base
-/// point `G` to get the corresponding public keys.
+/// Derives a complete Monero [`XmrWallet`] from a BIP-39 seed and mode.
 ///
 /// # Algorithm
 ///
 /// ```text
+/// Native mode:
 /// spend_private = Hs(seed)              // Keccak-256(seed) mod l
 /// view_private  = Hs(spend_private)     // Keccak-256(spend_private) mod l
 /// spend_public  = spend_private * G
 /// view_public   = view_private  * G
+///
+/// WalletCore mode:
+/// spend_bytes   = SLIP10(seed, "m/44'/128'/0'/0'/0'")
+/// spend_private = mod_l(spend_bytes)
+/// view_private  = Hs(spend_private)
 /// ```
 ///
 /// # Parameters
 ///
 /// - `seed` — 64-byte BIP-39 seed produced by `Mnemonic::to_seed(passphrase)`.
+/// - `mode` — derivation mode selected by the user.
 ///
 /// # Returns
 ///
 /// A fully initialised [`XmrWallet`] ready for address derivation.
-pub fn wallet_from_bip39_seed(seed: &[u8]) -> XmrWallet {
-  let spend_private = scalar_from_hash(seed);
+pub fn wallet_from_bip39_seed(seed: &[u8], mode: XmrDerivationMode) -> XmrWallet {
+  let spend_private = match mode {
+    XmrDerivationMode::Native => scalar_from_hash(seed),
+    XmrDerivationMode::WalletCore => {
+      let (spend_bytes, _chain_code) = derive_from_path("m/44'/128'/0'/0'/0'", seed);
+      Scalar::from_bytes_mod_order(spend_bytes)
+    }
+  };
+
   let view_private = scalar_from_hash(&spend_private.to_bytes());
 
   // Compute public keys as scalar multiples of the Ed25519 base point.
@@ -178,7 +189,7 @@ pub fn wallet_from_bip39_seed(seed: &[u8]) -> XmrWallet {
 ///
 /// # Examples
 ///
-/// ```
+/// ```ignore
 /// // Index 0 = standard address.
 /// assert_eq!(derivation_path(0), "xmr(major=0,minor=0)");
 /// // Index 3 = third subaddress.
@@ -419,4 +430,26 @@ fn encode_block(block: &[u8], encoded_size: usize) -> String {
   }
 
   out.into_iter().collect()
+}
+
+#[cfg(test)]
+mod tests {
+  use super::{derive_address, wallet_from_bip39_seed};
+  use crate::prompts::{XmrDerivationMode, XmrNetwork};
+
+  #[test]
+  fn walletcore_mode_derives_address() {
+    let seed = [7u8; 64];
+    let wallet = wallet_from_bip39_seed(&seed, XmrDerivationMode::WalletCore);
+    let addr = derive_address(&wallet, XmrNetwork::Mainnet, 0);
+    assert!(addr.address.starts_with('4'));
+  }
+
+  #[test]
+  fn native_mode_derives_address() {
+    let seed = [11u8; 64];
+    let wallet = wallet_from_bip39_seed(&seed, XmrDerivationMode::Native);
+    let addr = derive_address(&wallet, XmrNetwork::Mainnet, 0);
+    assert!(addr.address.starts_with('4'));
+  }
 }

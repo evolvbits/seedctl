@@ -2,8 +2,8 @@
 //!
 //! Solana uses the Ed25519 curve with BIP-32 SLIP-0010 derivation, producing
 //! base58-encoded 32-byte public keys as addresses. The derivation path
-//! follows `m/44'/501'/<index>'/0'`, which is compatible with Phantom,
-//! Solflare, and the Solana CLI.
+//! defaults to `m/44'/501'/<index>'/0'`, with optional compatibility styles
+//! and a scanner for common paths.
 //!
 //! Orchestrates the full interactive workflow:
 //!
@@ -21,7 +21,7 @@ mod wallet;
 use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
-  constants::{BIP44, ETHEREUM_COIN_TYPE},
+  constants::{BIP44, SOLANA_COIN_TYPE},
   ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
   userprofile,
   utils::print_mnemonic,
@@ -50,8 +50,14 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let passphrase = prompt_passphrase()?;
   let seed = mnemonic.to_seed(&passphrase);
 
-  // Derive the BIP-39 64-byte seed; individual address seeds are derived inside `derive`.
+  let mode = utils::select_derivation_mode()?;
+  if mode == 1 {
+    scan_common_paths(&seed)?;
+    return Ok(());
+  }
+
   let addr_count = utils::prompt_address_count()?;
+  let derivation_style = utils::select_derivation_style()?;
   let rpc_url = utils::prompt_rpc_url()?;
   // Private keys are shown unconditionally; add a prompt here to make this configurable.
   let show_privkeys = true;
@@ -69,8 +75,9 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   );
 
   // Derive the first key pair to use as the "account" keys in the display.
+  let first_path = utils::path_for_index(&derivation_style, 0);
   let (first_secret_hex, first_pubkey_hex) = {
-    let (kp0, _) = derive::keypair_and_address(&seed, 0)?;
+    let (kp0, _) = derive::keypair_and_address(&seed, &first_path)?;
     let secret_hex = hex::encode(kp0.to_bytes());
     let pubkey_hex = hex::encode(kp0.verifying_key().as_bytes());
     (secret_hex, pubkey_hex)
@@ -79,8 +86,8 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let mut addresses: Vec<(String, String, Option<f64>)> = Vec::with_capacity(addr_count as usize);
 
   for i in 0..addr_count {
-    let (_, addr) = derive::keypair_and_address(&seed, i)?;
-    let path = format!("m/44'/501'/{}'/0'", i);
+    let path = utils::path_for_index(&derivation_style, i);
+    let (_, addr) = derive::keypair_and_address(&seed, &path)?;
     let balance = if rpc_url.is_empty() {
       None
     } else {
@@ -89,11 +96,11 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     addresses.push((path, addr, balance));
   }
 
-  let export = wallet::build_export(info, &first_pubkey_hex)?;
+  let export = wallet::build_export(info, &first_pubkey_hex, &first_path)?;
 
   output::print_wallet_output(&output::WalletOutput {
-    purpose: ETHEREUM_COIN_TYPE,
-    coin_type: BIP44,
+    purpose: BIP44,
+    coin_type: SOLANA_COIN_TYPE,
     account_xprv: &first_secret_hex,
     account_xpub: &first_pubkey_hex,
     show_privkeys,
@@ -112,5 +119,17 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     );
   }
 
+  Ok(())
+}
+
+fn scan_common_paths(seed: &[u8]) -> Result<(), Box<dyn Error>> {
+  println!("\n🔎 Scanning common Solana derivation paths:\n");
+
+  for path in utils::common_scan_paths() {
+    let (_, addr) = derive::keypair_and_address(seed, path)?;
+    println!("{:<28} → {}", path, addr);
+  }
+
+  println!("\nTip: compare with your known wallet address to identify the right path.");
   Ok(())
 }
