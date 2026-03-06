@@ -10,6 +10,18 @@ use std::error::Error;
 
 use crate::utils::DerivationStyle;
 
+/// Prompts the user to choose between generating addresses and scanning common
+/// Tron derivation paths.
+pub fn select_derivation_mode() -> Result<usize, Box<dyn Error>> {
+  let theme = dialoguer_theme("►");
+  let choice = Select::with_theme(&theme)
+    .with_prompt("Select derivation mode (Tron):")
+    .items(["Generate addresses", "Scan common derivation paths"])
+    .default(0)
+    .interact()?;
+  Ok(choice)
+}
+
 /// Prompts the user for the number of Tron addresses to generate.
 ///
 /// Defaults to `10` if the user presses Enter without typing a value.

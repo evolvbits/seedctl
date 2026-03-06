@@ -13,7 +13,7 @@ use seedctl_core::{
   options::entropy_type,
   security::Security,
   ui::{dialoguer_theme, exit_confirm},
-  utils::dice_hash,
+  utils::{dice_hash, print_mnemonic},
 };
 use std::error::Error;
 
@@ -82,21 +82,38 @@ fn main() -> Result<(), Box<dyn Error>> {
         _ => unreachable!(),
       };
 
-      // Step 2 — choose the target network / currency.
+      // Step 2 — choose whether to only show the seed or pick a currency network.
       let theme = dialoguer_theme("►");
+      let mode = Select::with_theme(&theme)
+        .with_prompt("Select output mode:")
+        .items(["Show only seed information", "Using a currency network"])
+        .default(0)
+        .interact()
+        .unwrap();
+
+      if mode == 0 {
+        print_mnemonic(
+          &mnemonic,
+          &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
+        );
+        copyright_phrase();
+        exit_confirm();
+        return Ok(());
+      }
+
       let network = Select::with_theme(&theme)
-        .with_prompt("Select network:")
+        .with_prompt("Select currency network:")
         .items([
           "Bitcoin",
           "Ethereum (ETH + ERC20 tokens)",
           "BNB (BNB Smart Chain, EVM)",
           "XRP (XRP Ledger)",
           "Tron (TRX + TRC20 tokens)",
-          "Solana (SOL + SPL tokens)", // BUGFIX: Address being generated incorrectly (#4)
-          "Litecoin (LTC)", // BUGFIX: Address being generated incorrectly (#4)
+          "Solana (SOL + SPL tokens)",
+          "Litecoin (LTC)",
           "Polygon (MATIC, EVM)",
           "Cardano (ADA)",
-          "Monero (XMR)", // BUGFIX: Address being generated incorrectly.
+          "Monero (XMR)",
         ])
         .default(0)
         .interact()

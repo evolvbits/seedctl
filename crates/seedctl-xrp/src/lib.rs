@@ -57,6 +57,12 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let passphrase = prompt_passphrase()?;
   let master = master_from_mnemonic(mnemonic, &passphrase)?;
 
+  let mode = prompts::select_derivation_mode()?;
+  if mode == 1 {
+    scan_common_paths(&master)?;
+    return Ok(());
+  }
+
   // Step 3 — collect configuration (address count, optional RPC URL).
   let addr_count = prompts::prompt_address_count()?;
   let rpc_url = prompts::prompt_rpc_url()?;
@@ -122,5 +128,24 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     );
   }
 
+  Ok(())
+}
+
+fn scan_common_paths(master: &bip32::XPrv) -> Result<(), Box<dyn Error>> {
+  let common_paths = [
+    "m/44'/144'/0'/0/0",
+    "m/44'/144'/0'/0/1",
+    "m/44'/144'/1'/0/0",
+    "m/44'/144'/0'/1/0",
+    "m/44'/144'/0'",
+  ];
+
+  println!("\n🔎 Scanning common XRP derivation paths:\n");
+  for path in common_paths {
+    let child = seedctl_core::evm::derive_from_path(master.clone(), path)?;
+    let addr = derive::address_from_xprv(child)?;
+    println!("{:<22} → {}", path, addr);
+  }
+  println!("\nTip: compare with your known wallet address to find the right path.");
   Ok(())
 }

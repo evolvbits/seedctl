@@ -31,6 +31,18 @@ impl XrpNetwork {
   }
 }
 
+/// Prompts the user to choose between generating addresses and scanning common
+/// XRP derivation paths.
+pub fn select_derivation_mode() -> Result<usize, Box<dyn Error>> {
+  let choice = Select::with_theme(&dialoguer_theme("►"))
+    .with_prompt("Select derivation mode (XRP):")
+    .items(["Generate addresses", "Scan common derivation paths"])
+    .default(0)
+    .interact()?;
+
+  Ok(choice)
+}
+
 /// Prompts the user to choose between XRPL Mainnet and Testnet.
 ///
 /// Returns the selected [`XrpNetwork`] variant.

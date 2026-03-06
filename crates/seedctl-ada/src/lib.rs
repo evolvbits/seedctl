@@ -51,6 +51,11 @@ use std::{error::Error, fs, process::exit};
 pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Box<dyn Error>> {
   let network = prompts::select_network()?;
   let passphrase = prompt_passphrase()?;
+  let mode = prompts::select_derivation_mode()?;
+  if mode == 1 {
+    scan_common_paths(mnemonic, &passphrase, network)?;
+    return Ok(());
+  }
 
   // Account 0 is the conventional default for Cardano wallets.
   let account_index = 0u32;
@@ -113,5 +118,30 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     );
   }
 
+  Ok(())
+}
+
+fn scan_common_paths(
+  mnemonic: &Mnemonic,
+  passphrase: &str,
+  network: prompts::AdaNetwork,
+) -> Result<(), Box<dyn Error>> {
+  let common = [
+    (0u32, 0u32),
+    (0u32, 1u32),
+    (1u32, 0u32),
+    (1u32, 1u32),
+    (2u32, 0u32),
+  ];
+
+  println!("\n🔎 Scanning common Cardano derivation paths:\n");
+  let master = derive::master_from_mnemonic_icarus(mnemonic, passphrase);
+  for (account_idx, addr_idx) in common {
+    let account = derive::derive_account(&master, account_idx);
+    let (_, address) = derive::keypair_and_address(&account, addr_idx, network)?;
+    let path = derive::payment_path(account_idx, addr_idx);
+    println!("{:<24} → {}", path, address);
+  }
+  println!("\nTip: compare with your known wallet address to find the right path.");
   Ok(())
 }

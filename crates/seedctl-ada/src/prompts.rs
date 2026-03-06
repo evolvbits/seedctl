@@ -61,6 +61,19 @@ impl AdaNetwork {
   }
 }
 
+/// Prompts the user to choose between generating addresses and scanning common
+/// Cardano derivation paths.
+pub fn select_derivation_mode() -> Result<usize, Box<dyn Error>> {
+  let theme = dialoguer_theme("►");
+  let choice = Select::with_theme(&theme)
+    .with_prompt("Select derivation mode (Cardano):")
+    .items(["Generate addresses", "Scan common derivation paths"])
+    .default(0)
+    .interact()?;
+
+  Ok(choice)
+}
+
 /// Prompts the user to choose between Cardano Mainnet and Testnet.
 ///
 /// Returns the selected [`AdaNetwork`] variant.
