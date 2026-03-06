@@ -34,6 +34,11 @@
 - Adding documentation to the code
 - Migrating `SeedCTL` to `@evolvbits`
 
+# [0.2.2] – 2026-03-06
+
+- Adding Scan Common and improving menu navigation.
+- Adding Scan Common, fixing addressing errors for Solana, Litecoin, and Monero, and improving the menu ([#4](https://github.com/evolvbits/seedctl/issues/4))
+
 # [0.3.0] – 2026-??-?? [SHORTLY]
 
 Adding Cold Signing functionality:
