@@ -1,0 +1,41 @@
+Development Guide & Release Workflow
+
+This document outlines the environment setup and the workflow required to maintain code integrity and the automation of the CHANGELOG.md.
+
+1. System Requirements
+
+	Rust (v1.89+): Installed via rustup.rs.
+
+  Cargo Run Bin: Utility to run local project binaries. Install it via:
+
+	>>> cargo install cargo-run-bin
+
+2. Project Setup
+
+The first build will automatically compile git-cliff inside the target/bin folder:
+
+>>> cargo build
+
+3. Development Workflow
+
+Step A: Development
+
+Commit changes using Conventional Commits (e.g., feat: add scan, fix: bug).
+
+Step B: Preparing the Release
+
+  Update the version in the root Cargo.toml ([workspace.package]).
+
+  Generate the Changelog by running: cargo build --release.
+
+  Review CHANGELOG.md.
+
+Step C: Finalizing in Git
+
+  >>> git add .
+
+  >>> git commit -m "chore(release): prepare for vX.X.X"
+
+  >>> git tag vX.X.X
+
+  >>> git push origin main --tags
