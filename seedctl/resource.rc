@@ -2,20 +2,20 @@
 // MAIN ICON "icon.ico"
 
 1 VERSIONINFO
-    FILEVERSION    0,2,1,00
-    PRODUCTVERSION 0,2,1,00
+    FILEVERSION    0,2,2,00
+    PRODUCTVERSION 0,2,2,00
 {
     BLOCK "StringFileInfo"
     {
         BLOCK "040904b0"
         {
-            VALUE "CompanyName",        "SeedCTL\0"
+            VALUE "CompanyName",        "EvolvBits\0"
             VALUE "FileDescription",    "Cryptocurrency multichain wallet generator.\0"
-            VALUE "FileVersion",        "0.2.1\0"
-            VALUE "LegalCopyright",     "\251 SeedCTL\0"
+            VALUE "FileVersion",        "0.2.2\0"
+            VALUE "LegalCopyright",     "\251 EvolvBits\0"
             VALUE "OriginalFilename",   "seedctl.exe\0"
             VALUE "ProductName",        "seedctl\0"
-            VALUE "ProductVersion",     "0.2.1\0"
+            VALUE "ProductVersion",     "0.2.2\0"
         }
     }
     BLOCK "VarFileInfo"
