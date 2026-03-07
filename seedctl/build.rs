@@ -1,4 +1,4 @@
-use std::{fs, process::Command};
+use std::{env, fs, process::Command};
 
 fn git_commit() -> String {
   Command::new("git")
@@ -34,6 +34,39 @@ fn extract_value(content: &str, key: &str) -> Option<String> {
     .find(|line| line.trim_start().starts_with(key))
     .and_then(|line| line.split('=').nth(1))
     .map(|v| v.trim().trim_matches('"').to_string())
+}
+
+fn git_cliff() {
+  let profile = env::var("PROFILE").unwrap_or_else(|_| "debug".to_string());
+
+  if profile == "release" {
+    // Notify the role to rebuild if the root Cargo.toml changes.
+    println!("cargo:rerun-if-changed=../Cargo.toml");
+
+    let version = env!("CARGO_PKG_VERSION");
+
+    // We execute the command by explicitly pointing to the files in the root directory. (../)
+    let status = Command::new("cargo")
+      .args([
+        "bin",
+        "git-cliff",
+        "--config",
+        "cliff.toml", // Path to the config in the root directory.
+        "--tag",
+        &format!("v{}", version),
+        "--output",
+        "CHANGELOG.md",
+      ])
+      .current_dir("..") // FORCE the command to run in the workspace root.
+      .status();
+
+    match status {
+      Ok(s) if s.success() => println!("cargo:warning=✅ CHANGELOG.md updated to v{}", version),
+      _ => {
+        println!("cargo:warning=⚠️ Failed to update CHANGELOG.md. Check if git-cliff is working.")
+      }
+    }
+  }
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -78,6 +111,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
       }
     }
   }
+
+  // Git Cliff
+  git_cliff();
 
   Ok(())
 }
