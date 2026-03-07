@@ -5,6 +5,12 @@
 # Linux:
 *~
 
+# Husky:
+.husky
+
+# Git-Cliff
+.bin
+
 # Vim:
 .*.sw[a-z]
 .netrwhist
