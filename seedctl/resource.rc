@@ -12,9 +12,9 @@
             VALUE "CompanyName",        "EvolvBits\0"
             VALUE "FileDescription",    "Cryptocurrency multichain wallet generator.\0"
             VALUE "FileVersion",        "0.2.2\0"
-            VALUE "LegalCopyright",     "\251 EvolvBits\0"
+            VALUE "LegalCopyright",     "\251 EvolvBits. All rights reserved.\0"
             VALUE "OriginalFilename",   "seedctl.exe\0"
-            VALUE "ProductName",        "seedctl\0"
+            VALUE "ProductName",        "SeedCTL\0"
             VALUE "ProductVersion",     "0.2.2\0"
         }
     }
