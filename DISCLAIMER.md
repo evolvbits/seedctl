@@ -4,7 +4,7 @@
 
 The full legal and operational disclaimer is maintained at:
 
-- https://evolvbits.github.io/seedctl/docs/#disclaimer/
+- https://evolvbits.github.io/seedctl/documentation/#disclaimer/
 
 ## Scope
 

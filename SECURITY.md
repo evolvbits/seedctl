@@ -4,7 +4,7 @@
 
 Security guidance and policy are maintained at:
 
-- https://evolvbits.github.io/seedctl/docs/#security
+- https://evolvbits.github.io/seedctl/documentation/#security
 
 ## Vulnerability Reporting
 
