@@ -2,12 +2,14 @@
 
 All notable milestones of this project will be documented in this file.
 
-# [0.2.2] – 2026-03-07
+# [0.2.2] – 2026-03-13
 
 - Correcting footer Copyright
 - Correcting Copyright
 - Correcting urls
 - Adding Scan Common and improving menu navigation.
+- Fixing needless_borrow in crates/seedctl-sol/src/utils.rs
+- Resolving "MD034/no-bare-urls: Bare URL used" in markdown files
 
 # [0.2.1] – 2026-03-04
 
