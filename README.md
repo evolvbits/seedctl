@@ -22,11 +22,6 @@ The full and up-to-date documentation is hosted at:
 - **Reproducibility**: [https://evolvbits.github.io/seedctl/documentation/#reproducibility](https://evolvbits.github.io/seedctl/documentation/#reproducibility)
 - **Terms of Use**: [https://evolvbits.github.io/seedctl/documentation/#terms](https://evolvbits.github.io/seedctl/documentation/#terms)
 
-## Repository
-
-- GitHub: [https://github.com/evolvbits/seedctl](https://github.com/evolvbits/seedctl)
-- GitLab Mirror: [https://gitlab.com/evolvbits/seedctl](https://gitlab.com/evolvbits/seedctl)
-
 ## ⚠️ SECURITY WARNING
 
 SeedCTL does NOT store, transmit, or recover private keys.
@@ -36,3 +31,12 @@ Loss of mnemonic phrases or private keys will result in permanent loss of funds.
 Use this software at your own risk.
 
 For technical and operational details, always prefer the docs links above.
+
+## Repository
+
+- GitHub: [https://github.com/evolvbits/seedctl](https://github.com/evolvbits/seedctl)
+- GitLab Mirror: [https://gitlab.com/evolvbits/seedctl](https://gitlab.com/evolvbits/seedctl)
+
+## LICENSE
+
+Official license [Business Source License 1.1](https://github.com/evolvbits/seedctl/blob/main/LICENSE)
