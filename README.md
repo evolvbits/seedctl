@@ -27,4 +27,12 @@ The full and up-to-date documentation is hosted at:
 - GitHub: https://github.com/evolvbits/seedctl
 - GitLab Mirror: https://gitlab.com/evolvbits/seedctl
 
+## ⚠️ SECURITY WARNING
+
+SeedCTL does NOT store, transmit, or recover private keys.
+
+Loss of mnemonic phrases or private keys will result in permanent loss of funds.
+
+Use this software at your own risk.
+
 For technical and operational details, always prefer the docs links above.
