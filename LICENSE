@@ -1,52 +1,91 @@
-SeedCTL Source-Available License (SSAL)
+Business Source License 1.1
+
+License for the SeedCTL Project
+
+Licensor: EvolvBits Contributors
+Licensed Work: SeedCTL
 Copyright (c) 2026 EvolvBits Contributors
 
-1. Ownership
+This license governs the use of the SeedCTL software, including its source
+code, binaries, documentation, and related materials (the “Software”).
 
-The SeedCTL software and its source code are the exclusive property of
-EvolvBits Contributors. All intellectual property rights remain with the
-copyright holders.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. Grant of License
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-2. Permitted Use
+The Licensor grants you a non-exclusive, worldwide, non-transferable license to:
 
-You are granted a limited, non-exclusive, non-transferable license to:
+• Use the Software
+• Download and execute official binary releases
+• View and inspect the source code for personal, educational, or security review purposes.
 
-- Download and execute official SeedCTL binaries
-- Clone or download the source code for personal use, study, or security auditing
-- Run the software for personal or organizational purposes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2. Restrictions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-3. Restrictions
+You may NOT, without explicit written permission from the Licensor:
 
-Without prior written permission from EvolvBits Contributors, you may NOT:
+• Modify the source code
+• Create derivative works
+• Redistribute the source code
+• Redistribute compiled binaries
+• Mirror or re-host the repository
+• Incorporate the Software into another product
+• Sell or commercialize the Software
 
-- Modify the source code
-- Create derivative works
-- Distribute modified or unmodified copies
-- Publish or mirror the repository elsewhere
-- Use SeedCTL code in other projects
-- Commercialize the software or derivatives
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3. Ownership
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+All intellectual property rights in the Software remain the exclusive
+property of EvolvBits Contributors.
+
+No ownership rights are transferred under this license.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 4. Contributions
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Any contribution submitted to the repository automatically grants full
-ownership of that contribution to EvolvBits Contributors.
+Any contribution submitted to the SeedCTL project automatically grants
+EvolvBits Contributors full rights to use, modify, relicense, or distribute
+that contribution as part of the Software.
 
-5. Disclaimer
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5. Disclaimer of Warranty
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 
-SeedCTL handles cryptographic material including private keys and mnemonic
-phrases. Users assume all risks associated with its use.
+SeedCTL handles cryptographic material including mnemonic phrases and
+private keys. Users assume full responsibility for all outcomes resulting
+from use of the Software.
 
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 6. Limitation of Liability
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-EvolvBits Contributors shall not be liable for any damages including
-financial loss, loss of funds, loss of private keys, or data loss.
+IN NO EVENT SHALL EvolvBits Contributors BE LIABLE FOR ANY DAMAGES,
+INCLUDING BUT NOT LIMITED TO:
 
+• loss of cryptocurrency funds
+• loss of private keys
+• loss of mnemonic phrases
+• loss of data
+• financial loss
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 7. Termination
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-Violation of this license immediately terminates the rights granted herein.
+Any violation of this license immediately terminates all rights granted.
 
+Upon termination, all copies of the Software must be destroyed.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 8. Governing Law
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-This license shall be governed by the jurisdiction of the copyright holder.
+This license shall be governed by the laws of the jurisdiction of the
+copyright holder.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
