@@ -4,7 +4,7 @@
 
 The complete reproducibility guide is maintained at:
 
-- https://evolvbits.github.io/seedctl/documentation/#reproducibility
+- [https://evolvbits.github.io/seedctl/documentation/#reproducibility](https://evolvbits.github.io/seedctl/documentation/#reproducibility)
 
 ## Scope
 
