@@ -16,16 +16,16 @@
 
 The full and up-to-date documentation is hosted at:
 
-- **Docs Hub**: https://evolvbits.github.io/seedctl/documentation/
-- **Security**: https://evolvbits.github.io/seedctl/documentation/#security/
-- **Disclaimer**: https://evolvbits.github.io/seedctl/documentation/#disclaimer/
-- **Reproducibility**: https://evolvbits.github.io/seedctl/documentation/#reproducibility/
-- **Terms of Use**: https://evolvbits.github.io/seedctl/documentation/#terms/
+- **Docs Hub**: [https://evolvbits.github.io/seedctl/documentation](https://evolvbits.github.io/seedctl/documentation/)
+- **Security**: [https://evolvbits.github.io/seedctl/documentation/#security](https://evolvbits.github.io/seedctl/documentation/#security/)
+- **Disclaimer**: [https://evolvbits.github.io/seedctl/documentation/#disclaimer](https://evolvbits.github.io/seedctl/documentation/#disclaimer/)
+- **Reproducibility**: [https://evolvbits.github.io/seedctl/documentation/#reproducibility](https://evolvbits.github.io/seedctl/documentation/#reproducibility/)
+- **Terms of Use**: [https://evolvbits.github.io/seedctl/documentation/#terms](https://evolvbits.github.io/seedctl/documentation/#terms/)
 
 ## Repository
 
-- GitHub: https://github.com/evolvbits/seedctl
-- GitLab Mirror: https://gitlab.com/evolvbits/seedctl
+- GitHub: [https://github.com/evolvbits/seedctl](https://github.com/evolvbits/seedctl)
+- GitLab Mirror: [https://gitlab.com/evolvbits/seedctl](https://gitlab.com/evolvbits/seedctl)
 
 ## ⚠️ SECURITY WARNING
 
