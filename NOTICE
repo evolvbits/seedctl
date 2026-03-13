@@ -1,0 +1,23 @@
+SeedCTL
+Copyright (c) 2026 EvolvBits Contributors
+
+This software includes components developed by third parties.
+
+All trademarks, service marks, and trade names referenced in this
+project remain the property of their respective owners.
+
+SeedCTL is a command-line tool for generating cryptocurrency wallet
+seeds using user-provided entropy sources.
+
+Important Notice
+
+SeedCTL handles cryptographic material including mnemonic phrases
+and private keys.
+
+SeedCTL does not store, transmit, or recover private keys.
+
+Users are solely responsible for securely storing their mnemonic
+phrases and private keys.
+
+Loss or exposure of these secrets may result in permanent loss of
+cryptocurrency funds.
