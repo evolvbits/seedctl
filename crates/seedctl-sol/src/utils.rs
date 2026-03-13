@@ -108,7 +108,7 @@ pub fn common_scan_paths() -> &'static [&'static str] {
 /// Derives a 32-byte Ed25519 private scalar for `path`.
 pub fn derive_seed_from_path(seed: &[u8], path: &str) -> Result<[u8; 32], Box<dyn Error>> {
   // SLIP-0010 Ed25519 supports hardened derivation only.
-  let (private_key, _chain_code) = derive_from_path(&path, seed);
+  let (private_key, _chain_code) = derive_from_path(path, seed);
   Ok(private_key)
 }
 
