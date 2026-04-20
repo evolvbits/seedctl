@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+Created with Inkscape (http://www.inkscape.org/)
+  © 2026 William C. Canin
+  This artwork is protected by copyright.
+  Unauthorized use, copying, or modification is prohibited.
+-->
+
+<svg
+   width="270mm"
+   height="270mm"
+   viewBox="0 0 270 270"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.3 (0d15f75042, 2025-12-25)"
+   sodipodi:docname="seedctl-text.svg"
+   xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/"><title
+     id="title1">seedctl</title><sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.25197127"
+     inkscape:cx="460.36994"
+     inkscape:cy="460.36994"
+     inkscape:window-width="1071"
+     inkscape:window-height="991"
+     inkscape:window-x="26"
+     inkscape:window-y="23"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" /><defs
+     id="defs1" /><g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"><g
+       id="g1"
+       transform="matrix(0.85718958,0,0,0.85718958,16.710526,18.503102)"><text
+         xml:space="preserve"
+         style="font-size:3.8628px;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';writing-mode:lr-tb;direction:ltr;opacity:0.990863;fill:#000000;stroke-width:0.547484;stroke-linecap:square;stroke-miterlimit:1"
+         x="145.25804"
+         y="103.77558"
+         id="text1"
+         inkscape:label="copyright-symbol"><tspan
+           sodipodi:role="line"
+           id="tspan1"
+           style="font-size:3.8628px;fill:#000000;stroke-width:0.547484"
+           x="145.25804"
+           y="103.77558">©</tspan></text><path
+         style="opacity:0.990863;fill:#ff8716;fill-opacity:1;stroke:#7afefd;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+         d="m 218.95087,13.96663 c -3.79211,50.836108 -50.63217,63.502597 -67.33468,57.227918 7.79127,-15.692838 24.21535,-27.531604 41.87088,-40.689574 -37.60808,20.499933 -52.55687,45.640931 -49.09,74.553816 35.6688,3.09519 69.45652,62.8534 18.90097,98.96754 -8.89927,6.35716 -16.74541,9.50829 -24.22775,14.43791 -7.48234,-4.93028 -15.32848,-8.08141 -24.22775,-14.43857 C 64.286988,167.91153 98.074713,108.15332 133.74351,105.05813 137.21038,76.145253 122.26159,51.004255 84.653505,30.504322 104.44373,43.198229 120.84915,59.241073 126.36402,71.25486 109.66151,77.529539 62.981823,64.802086 59.189706,13.965978 64.233592,12.870851 122.38414,2.8625445 139.29072,77.324843 156.19729,2.8631957 213.90699,12.871503 218.95087,13.96663 Z"
+         id="path1-0"
+         sodipodi:nodetypes="ccccscscccccc"
+         inkscape:label="seed" /><path
+         style="opacity:0.990863;fill:#7efaf5;fill-opacity:1;stroke:#7cfcf9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+         d="m 141.92826,160.51796 12.27394,-7.08598 12.51768,7.08598 v 13.485 l -12.51768,7.34 -12.28167,-7.34 z"
+         id="path1-8"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:label="hexagon-3" /><path
+         style="opacity:0.990863;fill:#7dfbf7;fill-opacity:1;stroke:#7cfcf9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+         d="m 126.74292,134.34479 12.27394,-7.08598 12.51768,7.08598 v 13.485 l -12.51768,7.34 -12.28167,-7.34 z"
+         id="path1"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:label="hexagon-2" /><path
+         style="opacity:0.990863;fill:#7efaf5;fill-opacity:1;stroke:#7cfcf9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+         d="m 110.35383,160.51798 12.27394,-7.08598 12.51768,7.08598 v 13.485 l -12.51768,7.34 -12.28167,-7.34 z"
+         id="path1-7"
+         sodipodi:nodetypes="ccccccc"
+         inkscape:label="hexagon-1" /><text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:42.3333px;font-family:Ubuntu;-inkscape-font-specification:'Ubuntu Bold';writing-mode:lr-tb;direction:ltr;opacity:0.990863;fill:#ff8716;fill-opacity:0.992157;stroke:#7cfcf9;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:1;stroke-dasharray:none;stroke-opacity:1"
+         x="65.408226"
+         y="256.7294"
+         id="text2"><tspan
+           sodipodi:role="line"
+           id="tspan2"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:42.3333px;font-family:Ubuntu;-inkscape-font-specification:'Ubuntu Bold';fill:#ff8716;fill-opacity:0.992157;stroke-width:2;stroke-dasharray:none"
+           x="65.408226"
+           y="256.7294">seedctl</tspan></text></g></g><metadata
+     id="metadata1"><rdf:RDF><cc:Work
+         rdf:about=""><dc:creator><cc:Agent><dc:title>William C. Canin</dc:title></cc:Agent></dc:creator><dc:rights><cc:Agent><dc:title>© 2026 William C. Canin. Unauthorized use prohibited.</dc:title></cc:Agent></dc:rights><dc:publisher><cc:Agent><dc:title>William C. Canin</dc:title></cc:Agent></dc:publisher><dc:title>seedctl</dc:title></cc:Work></rdf:RDF></metadata></svg>
