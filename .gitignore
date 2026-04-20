@@ -4,6 +4,7 @@
 
 # Linux:
 *~
+*.bak
 
 # Husky:
 .husky
