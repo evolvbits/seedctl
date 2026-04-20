@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/seedctl.png" alt="SeedCTL" width="350"/>
+  <img src=".github/logo/seedctl-text.svg" alt="SeedCTL" width="350"/>
 </p>
 
 [![Build and Release (Linux & Windows)](https://github.com/evolvbits/seedctl/actions/workflows/release.yml/badge.svg)](https://github.com/evolvbits/seedctl/actions/workflows/release.yml)
@@ -12,15 +12,19 @@
 
 **SeedCTL** is a deterministic, offline-first multichain wallet generator.
 
+## Official page
+
+[https://evolvbits.github.io/products/seedctl/](https://evolvbits.github.io/products/seedctl/)
+
 ## Canonical Documentation
 
 The full and up-to-date documentation is hosted at:
 
-- **Docs Hub**: [https://evolvbits.github.io/seedctl/documentation](https://evolvbits.github.io/seedctl/documentation/)
-- **Security**: [https://evolvbits.github.io/seedctl/documentation/#security](https://evolvbits.github.io/seedctl/documentation/#security)
-- **Disclaimer**: [https://evolvbits.github.io/seedctl/documentation/#disclaimer](https://evolvbits.github.io/seedctl/documentation/#disclaimer)
-- **Reproducibility**: [https://evolvbits.github.io/seedctl/documentation/#reproducibility](https://evolvbits.github.io/seedctl/documentation/#reproducibility)
-- **Terms of Use**: [https://evolvbits.github.io/seedctl/documentation/#terms](https://evolvbits.github.io/seedctl/documentation/#terms)
+- **Docs Hub**: [https://evolvbits.github.io/products/seedctl/documentation](https://evolvbits.github.io/products/seedctl/documentation/)
+- **Security**: [https://evolvbits.github.io/products/seedctl/documentation/#security-policy](https://evolvbits.github.io/products/seedctl/documentation/#security-policy)
+- **Disclaimer**: [https://evolvbits.github.io/products/seedctl/documentation/#disclaimer](https://evolvbits.github.io/products/seedctl/documentation/#disclaimer)
+- **Reproducibility & Deterministic Recovery**: [https://evolvbits.github.io/products/seedctl/documentation/#reproducibility--deterministic-recovery](https://evolvbits.github.io/products/seedctl/documentation/#reproducibility--deterministic-recovery)
+- **Terms of Use**: [https://evolvbits.github.io/products/seedctl/documentation/#terms-of-use](https://evolvbits.github.io/products/seedctl/documentation/#terms-of-use)
 
 ## ⚠️ SECURITY WARNING
 
