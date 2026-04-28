@@ -1,0 +1,61 @@
+name: Publish installer to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Prepare _site
+        run: |
+          mkdir -p _site/installer
+          cp installer/linux.sh _site/installer/linux.sh
+          cp installer/windows.ps1 _site/installer/windows.ps1
+          chmod +x _site/installer/linux.sh
+
+          # Create index.html to redirect https://evolvbits.github.io/products/seedctl/
+
+          cat << 'EOF' > _site/index.html
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0; url=https://evolvbits.github.io/products/seedctl/">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Redirecting...</title>
+            <script>
+              window.location.href = "https://evolvbits.github.io/products/seedctl/";
+            </script>
+          </head>
+          <body>
+            <p>Redirecting to <a href="https://evolvbits.github.io/products/seedctl/">SeedCTL</a>...</p>
+          </body>
+          </html>
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
