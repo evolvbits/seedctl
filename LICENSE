@@ -1,58 +1,56 @@
 Business Source License 1.1
+===========================
 
 License for the SeedCTL Project
 
-Licensor: EvolvBits Contributors
+Licensor: EvolvBits
 Licensed Work: SeedCTL
-Copyright (c) 2026 EvolvBits Contributors
+Copyright (c) 2026 EvolvBits
 
 This license governs the use of the SeedCTL software, including its source
 code, binaries, documentation, and related materials (the “Software”).
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 1. Grant of License
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+--------------------
 
 The Licensor grants you a non-exclusive, worldwide, non-transferable license to:
 
-• Use the Software
-• Download and execute official binary releases
-• View and inspect the source code for personal, educational, or security review purposes.
+- Use the Software
+- Download and execute official binary releases
+- View and inspect the source code for personal, educational, or security review purposes.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 2. Restrictions
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+---------------
 
 You may NOT, without explicit written permission from the Licensor:
 
-• Modify the source code
-• Create derivative works
-• Redistribute the source code
-• Redistribute compiled binaries
-• Mirror or re-host the repository
-• Incorporate the Software into another product
-• Sell or commercialize the Software
+- Modify the source code
+- Create derivative works
+- Redistribute the source code
+- Redistribute compiled binaries
+- Mirror or re-host the repository
+- Incorporate the Software into another product
+- Sell or commercialize the Software
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 3. Ownership
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+------------
 
 All intellectual property rights in the Software remain the exclusive
 property of EvolvBits Contributors.
 
 No ownership rights are transferred under this license.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 4. Contributions
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------
 
 Any contribution submitted to the SeedCTL project automatically grants
 EvolvBits Contributors full rights to use, modify, relicense, or distribute
 that contribution as part of the Software.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 5. Disclaimer of Warranty
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-------------------------
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
 
@@ -60,32 +58,31 @@ SeedCTL handles cryptographic material including mnemonic phrases and
 private keys. Users assume full responsibility for all outcomes resulting
 from use of the Software.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 6. Limitation of Liability
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+--------------------------
 
 IN NO EVENT SHALL EvolvBits Contributors BE LIABLE FOR ANY DAMAGES,
 INCLUDING BUT NOT LIMITED TO:
 
-• loss of cryptocurrency funds
-• loss of private keys
-• loss of mnemonic phrases
-• loss of data
-• financial loss
+- loss of cryptocurrency funds
+- loss of private keys
+- loss of mnemonic phrases
+- loss of data
+- financial loss
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 7. Termination
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+--------------
 
 Any violation of this license immediately terminates all rights granted.
 
 Upon termination, all copies of the Software must be destroyed.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
 8. Governing Law
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------
 
 This license shall be governed by the laws of the jurisdiction of the
 copyright holder.
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
