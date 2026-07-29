@@ -30,6 +30,12 @@ For [Linux](https://www.kernel.org/){:target="_blank"}, do the following:
 bash <(curl -fsSL {{ url_full }}/seedctl/linux.sh)
 ```
 
+For [macOS](https://www.apple.com/macos/){:target="_blank"}:
+
+```sh
+bash <(curl -fsSL {{ url_full }}/seedctl/macos.sh)
+```
+
 Para [Windows](https://www.microsoft.com/windows/){:target="_blank"}:
 
 ```batch
@@ -41,7 +47,7 @@ iex (irm {{ url_full }}/seedctl/windows.ps1)
 
 > We recommend disconnecting manually, physically.
 
-**3 -** In a trusted environment, run the binary `seedctl-[VERSION]-[SYSTEM]-x86_64`.
+**3 -** In a trusted environment, run the binary `seedctl-[VERSION]-[PLATFORM]-[ARCH]`.
 
 **4 -** Important: Read ALL the initial recommendations.
 

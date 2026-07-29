@@ -26,6 +26,12 @@ For [Linux](https://www.kernel.org/){:target="_blank"}:
 bash <(curl -fsSL {{ url_full }}/seedctl/linux.sh) --uninstall
 ```
 
+For [macOS](https://www.apple.com/macos/){:target="_blank"}:
+
+```sh
+bash <(curl -fsSL {{ url_full }}/seedctl/macos.sh) --uninstall
+```
+
 Para [Windows](https://www.microsoft.com/windows/){:target="_blank"}:
 
 ```batch
