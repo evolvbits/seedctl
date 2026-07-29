@@ -63,7 +63,7 @@ pub fn print_about() {
     meta::PROJECT_REPOSITORY
   );
   println!(
-    "{}{}/README.md",
+    "{}{}#canonical-documentation",
     style("- Documentation: ").bold().yellow(),
     meta::PROJECT_REPOSITORY
   );

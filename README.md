@@ -23,10 +23,6 @@
 The full and up-to-date documentation is hosted at:
 
 - **Docs Hub**: [https://orbitbits.com/seedctl/documentation](https://orbitbits.com/seedctl/documentation/)
-- **Security**: [https://orbitbits.com/seedctl/documentation/#security](https://orbitbits.com/seedctl/documentation/#security)
-- **Disclaimer**: [https://orbitbits.com/seedctl/documentation/#disclaimer](https://orbitbits.com/seedctl/documentation/#disclaimer)
-- **Reproducibility & Deterministic Recovery**: [https://orbitbits.com/seedctl/documentation/#reproducibility](https://orbitbits.com/seedctl/documentation/#reproducibility)
-- **Terms of Use**: [https://orbitbits.com/seedctl/documentation/#terms](https://orbitbits.com/seedctl/documentation/#terms)
 
 ## ⚠️ SECURITY WARNING
 
