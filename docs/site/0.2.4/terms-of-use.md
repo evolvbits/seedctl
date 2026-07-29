@@ -26,6 +26,7 @@ These terms describe the operational responsibilities and risk assumptions accep
 
 - `SeedCTL` is provided as a technical tool for deterministic wallet generation and verification workflows.
 - The software does not custody assets, execute transactions, or provide investment advice.
+- `SeedCTL` is distributed under the GNU General Public License v3.0 only (`GPL-3.0-only`).
 
 ### User Responsibilities
 

@@ -64,7 +64,7 @@ pub fn entropy_type() -> Result<(i32, Vec<u8>, usize), Box<dyn Error>> {
       let dice: Vec<u8> = match dice_mode {
         0 => generate_random_dice(min_dice),
         1 => {
-          let dice = read_manual_dice_with_feedback(bits as usize);
+          let dice = read_manual_dice_with_feedback(bits as usize)?;
 
           if dice.len() < min_dice {
             return Err(

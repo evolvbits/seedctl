@@ -7,7 +7,7 @@
 //! - **[`entropy`]** — entropy sources, dice-based generation and resolution
 //! - **[`evm`]** — shared EVM derivation logic (ETH, BNB, MATIC, TRX)
 //! - **[`export`]** — watch-only wallet JSON serialisation structures
-//! - **[`macros`]** — cross-platform `userprofile!` path macro
+//! - **[`macros`]** — compatibility path macro
 //! - **[`options`]** — interactive entropy option flow (mnemonic size, dice mode)
 //! - **[`ui`]** — themed dialoguer prompts and wallet table rendering
 //! - **[`utils`]** — SHA-256 hashing, master key derivation, dice helpers

@@ -25,8 +25,7 @@ use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
   ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
-  userprofile,
-  utils::{format_fingerprint_hex, master_from_mnemonic_bip32, print_mnemonic},
+  utils::{format_fingerprint_hex, master_from_mnemonic_bip32, print_mnemonic, user_profile_path},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -129,10 +128,10 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export_watch_only = prompt_export_watch_only()?;
 
   if export_watch_only == 0 {
-    let filename = userprofile!(format!(
+    let filename = user_profile_path([format!(
       "wallet-ltc-{}-watch-only.json",
       format_fingerprint_hex(&fingerprint)
-    ));
+    )])?;
     fs::write(&filename, json)?;
     println!(
       "{} {}",

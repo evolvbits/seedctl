@@ -4,10 +4,10 @@
   <img src=".github/logo/seedctl-text.svg" alt="SeedCTL" width="350"/>
 </p>
 
-[![Build and Release (Linux & Windows)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml/badge.svg)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml)
+[![Build and Release (Linux, macOS & Windows)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml/badge.svg)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml)
 ![Release](https://img.shields.io/github/v/release/orbitbits/seedctl?label=latest&color=blue)
-![License](https://img.shields.io/badge/license-source--available-orange)
-![Rust](https://img.shields.io/badge/rust-1.75%2B-orange)
+![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)
+![Rust](https://img.shields.io/badge/rust-1.91%2B-orange)
 ![Offline](https://img.shields.io/badge/works-offline-important)
 ![Deterministic](https://img.shields.io/badge/deterministic-yes-success)
 ![No network](https://img.shields.io/badge/network-none-lightgrey)
@@ -41,4 +41,4 @@ For technical and operational details, always prefer the docs links above.
 
 ## LICENSE
 
-Official license [Business Source License 1.1](https://github.com/orbitbits/seedctl/blob/main/LICENSE)
+Official license: [GNU General Public License v3.0 only](https://github.com/orbitbits/seedctl/blob/main/LICENSE).

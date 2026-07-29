@@ -1,7 +1,12 @@
 [package]
 name = "seedctl-btc"
+description.workspace = true
+repository.workspace = true
 version.workspace = true
+authors.workspace = true
 edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
 # seedctl dependencies (crates)

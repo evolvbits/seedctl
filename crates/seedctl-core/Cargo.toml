@@ -5,6 +5,7 @@ description.workspace = true
 repository.workspace = true
 edition.workspace = true
 rust-version.workspace = true
+license.workspace = true
 
 [dependencies]
 dialoguer.workspace = true

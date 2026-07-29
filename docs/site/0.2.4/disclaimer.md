@@ -45,6 +45,8 @@ This software is provided "AS IS", without warranties of any kind, express or im
 
 You assume all risks resulting from software use, misuse, or environment failures.
 
+SeedCTL is distributed under the GNU General Public License v3.0 only (`GPL-3.0-only`). See the repository `LICENSE` file for the full terms.
+
 ### Limitation of Liability
 
 The author(s), maintainer(s), and contributor(s) shall not be liable for any direct or indirect loss, including loss of funds, data loss, operational loss, or security incidents resulting from use or misuse of this software.

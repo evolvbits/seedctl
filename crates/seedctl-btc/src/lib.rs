@@ -41,8 +41,7 @@ use bitcoin::key::Secp256k1;
 use console::style;
 use seedctl_core::{
   ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
-  userprofile,
-  utils::{format_fingerprint_hex, print_mnemonic},
+  utils::{format_fingerprint_hex, print_mnemonic, user_profile_path},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -137,14 +136,14 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
     desc_change: &desc_change,
   });
 
-  let json = to_string_pretty(&export).unwrap();
+  let json = to_string_pretty(&export)?;
   let export_watch_only = prompt_export_watch_only()?;
 
   if export_watch_only == 0 {
-    let filename = userprofile!(format!(
+    let filename = user_profile_path([format!(
       "wallet-btc-{}-watch-only.json",
       format_fingerprint_hex(&fingerprint)
-    ));
+    )])?;
     fs::write(&filename, json)?;
     println!(
       "{} {}",

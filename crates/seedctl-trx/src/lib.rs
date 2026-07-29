@@ -23,8 +23,7 @@ use bip39::Mnemonic;
 use console::style;
 use seedctl_core::{
   ui::{prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
-  userprofile,
-  utils::{master_from_mnemonic, print_mnemonic},
+  utils::{master_from_mnemonic, print_mnemonic, user_profile_path},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -107,7 +106,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
     let xpub_part = &export.keys.account_xpub[0..7];
-    let filename = userprofile!(format!("wallet-trx-{}-watch-only.json", xpub_part));
+    let filename = user_profile_path([format!("wallet-trx-{}-watch-only.json", xpub_part)])?;
     fs::write(&filename, to_string_pretty(&export)?)?;
     println!(
       "{} {}",

@@ -26,8 +26,7 @@ use console::style;
 use seedctl_core::{
   constants::{BIP44, XRP_COIN_TYPE},
   ui::{print_wallet_header, prompt_confirm_options, prompt_export_watch_only, prompt_passphrase},
-  userprofile,
-  utils::{master_from_mnemonic, print_mnemonic},
+  utils::{master_from_mnemonic, print_mnemonic, user_profile_path},
 };
 use serde_json::to_string_pretty;
 use std::{error::Error, fs, process::exit};
@@ -119,7 +118,7 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   let export_watch_only = prompt_export_watch_only()?;
   if export_watch_only == 0 {
     let xpub_part = &export.keys.account_xpub[0..7];
-    let filename = userprofile!(format!("wallet-xrp-{}-watch-only.json", xpub_part));
+    let filename = user_profile_path([format!("wallet-xrp-{}-watch-only.json", xpub_part)])?;
     fs::write(&filename, to_string_pretty(&export)?)?;
     println!(
       "{} {}",

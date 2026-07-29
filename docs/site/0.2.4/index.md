@@ -17,10 +17,10 @@ permalink: /seedctl/documentation/0.2.4/
 
 {% include assign.liquid %}
 
-[![Build and Release (Linux & Windows)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml/badge.svg)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml)
+[![Build and Release (Linux, macOS & Windows)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml/badge.svg)](https://github.com/orbitbits/seedctl/actions/workflows/release.yml)
 ![Release](https://img.shields.io/github/v/release/orbitbits/seedctl?label=latest&color=blue)
-[![License](https://img.shields.io/badge/license-source--available-orange)](https://orbitbits.com/seedctl/license/)
-![Rust](https://img.shields.io/badge/rust-1.75%2B-orange)
+[![License](https://img.shields.io/badge/license-GPL--3.0--only-blue)](https://github.com/orbitbits/seedctl/blob/main/LICENSE)
+![Rust](https://img.shields.io/badge/rust-1.91%2B-orange)
 ![Offline](https://img.shields.io/badge/works-offline-important)
 ![Deterministic](https://img.shields.io/badge/deterministic-yes-success)
 ![No network](https://img.shields.io/badge/network-none-lightgrey)
@@ -37,6 +37,8 @@ The project is intended for security‑sensitive use cases such as audits, recov
 
 `SeedCTL` is a CLI‑first, deterministic, offline‑focused multichain wallet generator.
 It supports reproducible wallet derivation workflows with explicit entropy handling and visible derivation paths.
+
+`SeedCTL` is licensed under the GNU General Public License v3.0 only (`GPL-3.0-only`).
 
 ---
 
@@ -64,6 +66,12 @@ It allows you to:
 - [Build and Release workflow](https://github.com/orbitbits/seedctl/actions/workflows/release.yml){:target="_blank"}
 - [GitLab Releases](https://github.com/orbitbits/seedctl/releases){:target="_blank"}
 - [GitHub Issues](https://github.com/orbitbits/seedctl/issues){:target="_blank"}
+
+### Development Baseline
+
+- Rust toolchain: `1.91.0`
+- License: `GPL-3.0-only`
+- Release targets: Linux x86_64, macOS x86_64, macOS aarch64, and Windows x86_64
 
 **Operational warning:**
 

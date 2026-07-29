@@ -7,15 +7,14 @@ SeedCTL is developed and maintained by the OrbitBits Contributors.
 SeedCTL and its source code are the intellectual property of
 OrbitBits Contributors.
 
-All rights are reserved unless explicitly granted under the
-Business Source License 1.1.
+Rights are granted under the GNU General Public License version 3.
 
 ## License
 
-SeedCTL is distributed under the Business Source License 1.1 (BSL 1.1).
-
-You may view and use the software but you may not modify, redistribute,
-or commercialize it without written permission from the copyright holders.
+SeedCTL is distributed under the GNU General Public License v3.0 only
+(`GPL-3.0-only`). You may use, copy, modify, and redistribute the software
+under the terms of the GPLv3. See [`LICENSE`](LICENSE) for the full license
+text.
 
 ## Disclaimer
 
@@ -52,6 +51,8 @@ The OrbitBits Contributors assume no responsibility for:
 
 SeedCTL may depend on third-party open source components.
 Those components remain under their respective licenses.
+Distribution of SeedCTL binaries must also satisfy the GPLv3 requirements for
+corresponding source and license notices.
 
 ## Contact
 

@@ -2,6 +2,9 @@ SeedCTL – Third Party Licenses
 
 Copyright (c) 2026 OrbitBits Contributors
 
+SeedCTL itself is licensed under the GNU General Public License v3.0 only
+(`GPL-3.0-only`). See the top-level LICENSE file for the full terms.
+
 SeedCTL may include or depend on third-party libraries and components.
 
 Each third-party component remains under its respective license.
