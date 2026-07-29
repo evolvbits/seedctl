@@ -7,8 +7,9 @@ edition.workspace = true
 # seedctl dependencies (crates)
 seedctl-core.workspace = true
 # Own dependencies
-bitcoin = "0.32.8"
+bitcoin = { version = "0.32.8", features = ["base64"] }
 bip39 = "2"
+hex.workspace = true
 # Global dependencies
 dialoguer.workspace = true
 console.workspace = true

@@ -82,11 +82,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         _ => unreachable!(),
       };
 
-      // Step 2 — choose whether to only show the seed or pick a currency network.
+      // Step 2 — choose whether to only show the seed, derive addresses, or cold-sign.
       let theme = dialoguer_theme("►");
       let mode = Select::with_theme(&theme)
-        .with_prompt("Select output mode:")
-        .items(["Show only seed information", "Using a currency network"])
+        .with_prompt("Select wallet operation:")
+        .items([
+          "Manage Seeds (show seed information)",
+          "Derive Addresses (BTC, ETH/EVM, SOL, ...)",
+          "Sign Offline Transaction (Cold Sign)",
+        ])
         .default(0)
         .interact()
         .unwrap();
@@ -96,6 +100,25 @@ fn main() -> Result<(), Box<dyn Error>> {
           &mnemonic,
           &format!("BIP39 MNEMONIC ({} words):", mnemonic.word_count()),
         );
+        copyright_phrase();
+        exit_confirm();
+        return Ok(());
+      }
+
+      if mode == 2 {
+        let sign_mode = Select::with_theme(&theme)
+          .with_prompt("Cold signing network:")
+          .items(["Bitcoin (via PSBT)", "EVM (via Raw Hex / EIP-155)"])
+          .default(0)
+          .interact()
+          .unwrap();
+
+        match sign_mode {
+          0 => seedctl_btc::sign_offline(&mnemonic)?,
+          1 => seedctl_eth::sign_offline(&mnemonic)?,
+          _ => unreachable!(),
+        }
+
         copyright_phrase();
         exit_confirm();
         return Ok(());

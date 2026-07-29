@@ -19,6 +19,7 @@ mod output;
 mod prompts;
 mod rpc;
 mod scanner;
+mod signing;
 mod utils;
 mod wallet;
 
@@ -125,4 +126,9 @@ pub fn run(coin_name: &str, mnemonic: &Mnemonic, info: &[&str]) -> Result<(), Bo
   }
 
   Ok(())
+}
+
+/// Runs the interactive offline EVM transaction signing workflow.
+pub fn sign_offline(mnemonic: &Mnemonic) -> Result<(), Box<dyn Error>> {
+  signing::sign_offline(mnemonic)
 }
