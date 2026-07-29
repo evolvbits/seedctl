@@ -16,8 +16,10 @@ use crossterm::{
 use rand::RngExt;
 use sha2::{Digest, Sha256};
 use std::{
+  env,
   error::Error,
   io::{self, Write},
+  path::{Path, PathBuf},
   time::Duration,
 };
 
@@ -48,13 +50,23 @@ pub fn generate_random_dice(count: usize) -> Vec<u8> {
 ///
 /// Blocks until the user has entered at least enough dice rolls to reach
 /// `bits_target` bits of entropy, then presses Enter.
-pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
-  enable_raw_mode().unwrap();
-  execute!(io::stdout(), Hide).unwrap();
+pub fn read_manual_dice_with_feedback(bits_target: usize) -> Result<Vec<u8>, Box<dyn Error>> {
+  struct TerminalGuard;
+
+  impl Drop for TerminalGuard {
+    fn drop(&mut self) {
+      let _ = execute!(io::stdout(), Show);
+      let _ = disable_raw_mode();
+    }
+  }
+
+  enable_raw_mode()?;
+  execute!(io::stdout(), Hide)?;
+  let guard = TerminalGuard;
 
   // Drain any pending key events left over from previous menu interactions.
-  while event::poll(Duration::from_millis(0)).unwrap() {
-    let _ = event::read();
+  while event::poll(Duration::from_millis(0))? {
+    let _ = event::read()?;
   }
 
   let mut dice: Vec<u8> = Vec::new();
@@ -62,10 +74,10 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
   println!("{}", style("[ Enter dice sequence (1–6) ]").yellow().bold());
 
   loop {
-    if let Event::Key(event) = read().unwrap() {
+    if let Event::Key(event) = read()? {
       match event.code {
         KeyCode::Char(c) if ('1'..='6').contains(&c) => {
-          dice.push(c.to_digit(10).unwrap() as u8);
+          dice.push((c as u8) - b'0');
         }
         KeyCode::Backspace => {
           dice.pop();
@@ -92,22 +104,21 @@ pub fn read_manual_dice_with_feedback(bits_target: usize) -> Vec<u8> {
       let dice_str: String = dice.iter().map(|d| char::from(b'0' + *d)).collect();
 
       print!("\r");
-      execute!(io::stdout(), Clear(ClearType::CurrentLine)).unwrap();
+      execute!(io::stdout(), Clear(ClearType::CurrentLine))?;
 
       print!(
         "> Dice: {:3} | Bits: {:7.2} / {:3} | {} | [{}]",
         dice_count, bits, bits_target, status, dice_str
       );
 
-      io::stdout().flush().unwrap();
+      io::stdout().flush()?;
     }
   }
 
-  execute!(io::stdout(), Show).unwrap();
-  disable_raw_mode().unwrap();
+  drop(guard);
   println!();
 
-  dice
+  Ok(dice)
 }
 
 /// Prints a BIP-39 mnemonic as a numbered table with word indices.
@@ -145,6 +156,32 @@ pub fn dice_hash(dice: &[u8]) -> Vec<u8> {
 /// Returns the minimum number of dice rolls needed to reach `bits` of entropy.
 pub fn required_dice(bits: usize) -> usize {
   ((bits as f64) / BITS_PER_DIE).ceil() as usize
+}
+
+/// Builds a path rooted at the current user's home directory.
+pub fn user_profile_path<I, P>(parts: I) -> Result<PathBuf, Box<dyn Error>>
+where
+  I: IntoIterator<Item = P>,
+  P: AsRef<Path>,
+{
+  let home = if cfg!(windows) {
+    env::var_os("USERPROFILE").or_else(|| {
+      let drive = env::var_os("HOMEDRIVE")?;
+      let path = env::var_os("HOMEPATH")?;
+      let mut home = drive;
+      home.push(path);
+      Some(home)
+    })
+  } else {
+    env::var_os("HOME")
+  }
+  .ok_or("home directory environment variable is not set")?;
+
+  let mut path = PathBuf::from(home);
+  for part in parts {
+    path.push(part);
+  }
+  Ok(path)
 }
 
 /// Formats a 4-byte fingerprint as a lowercase hex string (e.g. `"a1b2c3d4"`).

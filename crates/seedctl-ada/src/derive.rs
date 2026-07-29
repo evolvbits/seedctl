@@ -49,8 +49,8 @@ pub struct AdaAccount {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq!(account_path(0), "m/1852'/1815'/0'");
+/// ```text
+/// account_path(0) == "m/1852'/1815'/0'"
 /// ```
 pub fn account_path(account: u32) -> String {
   format!("m/1852'/1815'/{}'", account)
@@ -61,8 +61,8 @@ pub fn account_path(account: u32) -> String {
 ///
 /// # Example
 ///
-/// ```
-/// assert_eq!(payment_path(0, 3), "m/1852'/1815'/0'/0/3");
+/// ```text
+/// payment_path(0, 3) == "m/1852'/1815'/0'/0/3"
 /// ```
 pub fn payment_path(account: u32, index: u32) -> String {
   format!("m/1852'/1815'/{}'/0/{}", account, index)

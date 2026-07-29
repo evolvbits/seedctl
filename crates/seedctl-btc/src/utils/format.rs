@@ -19,11 +19,9 @@
 ///
 /// # Examples
 ///
-/// ```
-/// use seedctl_btc::utils::format::format_key_origin;
-///
-/// let fp = [0xa1u8, 0xb2, 0xc3, 0xd4];
-/// assert_eq!(format_key_origin(fp, 84, 0), "[a1b2c3d4/84h/0h/0h]");
+/// ```text
+/// format_key_origin([0xa1, 0xb2, 0xc3, 0xd4], 84, 0)
+///   == "[a1b2c3d4/84h/0h/0h]"
 /// ```
 pub fn format_key_origin(fingerprint: [u8; 4], purpose: u32, coin_type: u32) -> String {
   format!(

@@ -35,12 +35,10 @@ fn main() -> Result<(), Box<dyn Error>> {
       let term = console::Term::stdout();
       term.clear_screen()?;
 
-      // NOTE: Network connectivity check is intentionally disabled.
-      // Uncomment the block below to enforce air-gapped operation.
+      // Enforce air-gapped operation before exposing seed material.
       Connection::check();
 
-      // NOTE: Security warning screen is intentionally disabled.
-      // Uncomment the block below to show the cold-wallet disclaimer.
+      // Show the cold-wallet disclaimer and require explicit acknowledgement.
       let security = Security;
       security.warning("I UNDERSTOOD")?;
 
@@ -54,8 +52,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .with_prompt("Choose action:")
         .items(["Create new wallet", "Import existing wallet"])
         .default(0)
-        .interact()
-        .unwrap();
+        .interact()?;
 
       // Step 1 — obtain the mnemonic (freshly generated or user-supplied).
       let mnemonic = match action {
@@ -92,8 +89,7 @@ fn main() -> Result<(), Box<dyn Error>> {
           "Sign Offline Transaction (Cold Sign)",
         ])
         .default(0)
-        .interact()
-        .unwrap();
+        .interact()?;
 
       if mode == 0 {
         print_mnemonic(
@@ -110,8 +106,7 @@ fn main() -> Result<(), Box<dyn Error>> {
           .with_prompt("Cold signing network:")
           .items(["Bitcoin (via PSBT)", "EVM (via Raw Hex / EIP-155)"])
           .default(0)
-          .interact()
-          .unwrap();
+          .interact()?;
 
         match sign_mode {
           0 => seedctl_btc::sign_offline(&mnemonic)?,
@@ -139,8 +134,7 @@ fn main() -> Result<(), Box<dyn Error>> {
           "Monero (XMR)",
         ])
         .default(0)
-        .interact()
-        .unwrap();
+        .interact()?;
 
       // Step 3 — dispatch to the selected chain crate.
       let info = &[meta::PROJECT_NAME, meta::VERSION, meta::PROJECT_REPOSITORY];

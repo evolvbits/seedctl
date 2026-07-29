@@ -96,5 +96,76 @@ fn decode_hex(input: &str) -> Result<Vec<u8>, Box<dyn Error>> {
     .trim()
     .trim_start_matches("0x")
     .trim_start_matches("0X");
+
+  if cleaned.is_empty() {
+    return Err("unsigned transaction hex cannot be empty".into());
+  }
+
   Ok(alloy::hex::decode(cleaned)?)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use alloy::{
+    consensus::{SignableTransaction, TxLegacy},
+    primitives::{Address, Bytes, TxKind, U256},
+  };
+
+  fn unsigned_legacy_hex(chain_id: u64) -> String {
+    let tx = TypedTransaction::Legacy(TxLegacy {
+      chain_id: Some(chain_id),
+      nonce: 0,
+      gas_price: 1_000_000_000,
+      gas_limit: 21_000,
+      to: TxKind::Call(Address::ZERO),
+      value: U256::from(1_u64),
+      input: Bytes::new(),
+    });
+    let mut encoded = Vec::new();
+    tx.encode_for_signing(&mut encoded);
+    format!("0x{}", alloy::hex::encode(encoded))
+  }
+
+  #[test]
+  fn rejects_empty_unsigned_hex() {
+    let private_key = [1_u8; 32];
+    let err = sign_unsigned_hex_with_key(&private_key, 1, "0x").unwrap_err();
+    assert!(err.to_string().contains("cannot be empty"));
+  }
+
+  #[test]
+  fn rejects_invalid_unsigned_hex() {
+    let private_key = [1_u8; 32];
+    let err = sign_unsigned_hex_with_key(&private_key, 1, "0xzz").unwrap_err();
+    assert!(!err.to_string().is_empty());
+  }
+
+  #[test]
+  fn rejects_trailing_bytes() {
+    let private_key = [1_u8; 32];
+    let mut tx = unsigned_legacy_hex(1);
+    tx.push_str("00");
+
+    let err = sign_unsigned_hex_with_key(&private_key, 1, &tx).unwrap_err();
+    assert!(err.to_string().contains("trailing bytes"));
+  }
+
+  #[test]
+  fn rejects_chain_id_mismatch() {
+    let private_key = [1_u8; 32];
+    let err = sign_unsigned_hex_with_key(&private_key, 56, &unsigned_legacy_hex(1)).unwrap_err();
+    assert!(err.to_string().contains("does not match"));
+  }
+
+  #[test]
+  fn signs_legacy_transaction_deterministically() {
+    let private_key = [1_u8; 32];
+    let signed_a = sign_unsigned_hex_with_key(&private_key, 1, &unsigned_legacy_hex(1)).unwrap();
+    let signed_b = sign_unsigned_hex_with_key(&private_key, 1, &unsigned_legacy_hex(1)).unwrap();
+
+    assert_eq!(signed_a, signed_b);
+    assert!(signed_a.starts_with("0x"));
+    assert!(signed_a.len() > unsigned_legacy_hex(1).len());
+  }
 }
