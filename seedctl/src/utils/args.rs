@@ -6,6 +6,37 @@
 use super::{meta, slogan::slogan_view};
 use console::style;
 
+fn authors_lines(authors: &str) -> String {
+  authors
+    .replace("://", "\0PROTO\0")
+    .split(':')
+    .map(|author| author.trim().replace("\0PROTO\0", "://"))
+    .filter(|author| !author.is_empty())
+    .map(|author| format!("  - {}", author))
+    .collect::<Vec<_>>()
+    .join("\n")
+}
+
+fn print_credits() {
+  println!();
+  println!(
+    "{}",
+    style(format!("Credits: {}", "-".repeat(65))).cyan().bold()
+  );
+  println!("- {}:", style("Authors").bold());
+  println!("{}", authors_lines(meta::PROJECT_AUTHORS));
+  println!(
+    "- {}: {}",
+    style("Maintainer").bold(),
+    meta::PROJECT_MAINTAINER
+  );
+  println!(
+    "- {}: {}",
+    style("Copyright").bold(),
+    meta::PROJECT_COPYRIGHT
+  );
+}
+
 /// Prints the short version string to stdout.
 ///
 /// Format: `<name> <version> (<commit> <date>)`
@@ -27,8 +58,8 @@ pub fn print_version() {
 /// Prints the full about screen to stdout.
 ///
 /// Renders the ASCII art slogan, followed by a structured list of build
-/// metadata (version, commit, build profile, date, maintainer, repository,
-/// documentation link), and closes with the copyright footer.
+/// metadata (version, commit, build profile, date, homepage, repository,
+/// documentation link), and final credits.
 pub fn print_about() {
   slogan_view(false, false);
   println!();
@@ -54,8 +85,8 @@ pub fn print_about() {
   );
   println!(
     "{}{}",
-    style("- Maintainer: ").bold().yellow(),
-    meta::PROJECT_MAINTAINER
+    style("- Homepage: ").bold().yellow(),
+    meta::PROJECT_HOMEPAGE
   );
   println!(
     "{}{}",
@@ -63,10 +94,9 @@ pub fn print_about() {
     meta::PROJECT_REPOSITORY
   );
   println!(
-    "{}{}#canonical-documentation",
+    "{}{}",
     style("- Documentation: ").bold().yellow(),
-    meta::PROJECT_REPOSITORY
+    meta::PROJECT_DOCUMENTATION
   );
-
-  super::copyright_phrase();
+  print_credits();
 }

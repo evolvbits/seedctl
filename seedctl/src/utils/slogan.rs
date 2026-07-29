@@ -103,7 +103,7 @@ pub fn slogan_view(show_doc: bool, show_version: bool) {
     println!(
       "    {}{}\n",
       "Documentation: ".bold().yellow(),
-      format!("{}#canonical-documentation", meta::PROJECT_REPOSITORY).cyan()
+      meta::PROJECT_DOCUMENTATION.cyan()
     );
   } else {
     println!("\n");
