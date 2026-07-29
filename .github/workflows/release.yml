@@ -2,11 +2,17 @@ name: Build and Release (Linux, macOS & Windows)
 
 on:
   push:
-    tags:
-      - "v*"
+    branches:
+      - main
+    paths-ignore:
+      - "CHANGELOG.md"
 
 permissions:
   contents: write
+
+concurrency:
+  group: release-main
+  cancel-in-progress: false
 
 env:
   GIT_CLIFF_VERSION: "2.13.1"
@@ -63,6 +69,7 @@ jobs:
         run: |
           VERSION=$(cargo pkgid -p seedctl | sed 's/.*#//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
 
       - name: Cache Cargo
         uses: actions/cache@v4
@@ -138,10 +145,24 @@ jobs:
         run: |
           VERSION=$(cargo pkgid -p seedctl | sed 's/.*#//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=v$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Prepare release tag context
+        run: |
+          git fetch --force --tags
+          TAG="${{ steps.version.outputs.tag }}"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            TAG_SHA="$(git rev-list -n 1 "$TAG")"
+            if [ "$TAG_SHA" != "${{ github.sha }}" ]; then
+              echo "Tag $TAG already exists at $TAG_SHA."
+              echo "Bump Cargo.toml version before releasing a new main commit."
+              exit 1
+            fi
+          fi
+          git tag --force "$TAG" "${{ github.sha }}"
 
       - name: Generate release notes
         run: |
-          git fetch --force --tags
           git cliff --config cliff.toml --current --strip header --output RELEASE_NOTES.md
           perl -0pi -e 's/\n{3,}/\n\n/g; s/\s+\z/\n/' RELEASE_NOTES.md
           if ! grep -q '^- ' RELEASE_NOTES.md; then
@@ -199,7 +220,8 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          target_commitish: ${{ github.sha }}
           name: Version ${{ steps.version.outputs.version }}
           body_path: RELEASE_NOTES.md
           files: |
