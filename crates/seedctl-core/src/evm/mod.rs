@@ -31,10 +31,12 @@ use crate::{
   export,
   ui::{AddressRows, dialoguer_theme, print_standard_wallet},
 };
-use bip32::{ChildNumber, DerivationPath, XPrv};
+use bip32::{
+  ChildNumber, DerivationPath, XPrv,
+  secp256k1::ecdsa::{SigningKey, VerifyingKey},
+};
 use console::style;
 use dialoguer::{Input, Select};
-use k256::ecdsa::{SigningKey, VerifyingKey};
 use sha3::{Digest, Keccak256};
 use std::error::Error;
 

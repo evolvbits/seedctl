@@ -20,4 +20,4 @@ bip39.workspace = true
 console.workspace = true
 dialoguer.workspace = true
 serde_json.workspace = true
-alloy = { version = "1.8.3", default-features = false, features = ["consensus", "signer-local", "rlp", "eips"] }
+alloy.workspace = true

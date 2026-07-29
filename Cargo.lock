@@ -1285,6 +1285,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "850970a274ad3f4cb46366499c0e1f811aa717ea2514329b1dfee2aa377f68b4"
 
 [[package]]
+name = "cryptoxide"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c567dc35857fdfce3f1f0b9f843e6481820c043614ca0db3872ca9df340ba4b"
+
+[[package]]
 name = "curve25519-dalek"
 version = "4.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1514,7 +1520,7 @@ version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a9bf77cf581d1a8c5f73c45e6d31aa45cfcb94438310f2f628b07e4727949115"
 dependencies = [
- "cryptoxide",
+ "cryptoxide 0.5.3",
 ]
 
 [[package]]
@@ -3426,7 +3432,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip39",
  "console",
@@ -3449,12 +3455,12 @@ dependencies = [
 
 [[package]]
 name = "seedctl-ada"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bech32",
  "bip39",
  "console",
- "cryptoxide",
+ "cryptoxide 0.6.1",
  "dialoguer",
  "ed25519-bip32",
  "hex",
@@ -3467,7 +3473,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-bnb"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip32",
  "bip39",
@@ -3479,7 +3485,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-btc"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip39",
  "bitcoin",
@@ -3493,7 +3499,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-core"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip32",
  "bip39",
@@ -3513,7 +3519,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-eth"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "alloy",
  "bip32",
@@ -3527,7 +3533,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-ltc"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bech32",
  "bip32",
@@ -3546,7 +3552,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-matic"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip32",
  "bip39",
@@ -3558,7 +3564,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-sol"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip39",
  "bs58",
@@ -3574,7 +3580,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-trx"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip32",
  "bip39",
@@ -3591,7 +3597,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-xmr"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip39",
  "console",
@@ -3607,7 +3613,7 @@ dependencies = [
 
 [[package]]
 name = "seedctl-xrp"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "bip32",
  "bip39",

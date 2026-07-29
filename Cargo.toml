@@ -9,7 +9,7 @@ git-cliff = { version = "2.12.0" }
 [workspace.package]
 description = "Deterministic, auditable, security-focused multichain wallet manager."
 repository = "https://github.com/orbitbits/seedctl"
-version = "0.2.3"
+version = "0.2.4"
 authors = ["OrbitBits <contact.orbitbits@gmail.com>"]
 edition = "2024"
 rust-version = "1.89"
@@ -26,18 +26,32 @@ seedctl-ltc = { path = "crates/seedctl-ltc" }
 seedctl-matic = { path = "crates/seedctl-matic" }
 seedctl-ada = { path = "crates/seedctl-ada" }
 seedctl-xmr = { path = "crates/seedctl-xmr" }
-anyhow = "1.0.101"
-serde = { version = "1", features = ["derive"] }
-reqwest = { version = "0.13.2", features = ["blocking", "json"] }
+bitcoin = { version = "0.32.8", features = ["base64"] }
+anyhow = "1.0.104"
+serde = { version = "1.0.229", features = ["derive"] }
+reqwest = { version = "0.13.4", features = ["blocking", "json"] }
 bip32 = { version = "0.5", features = ["secp256k1"] }
-serde_json = "1"
+serde_json = "1.0.151"
 dialoguer = "0.12.0"
-console = "0.16.2"
+console = "0.16.4"
 hex = "0.4.3"
-rand = "0.10.0"
+rand = "0.10.2"
 crossterm = "0.29.0"
 sha2 = "0.10.9"
+sha3 = "0.10.8"
+k256 = "0.13.4"
+bs58 = "0.5"
 bip39 = "2.2.2"
+curve25519-dalek = "4.1.3"
+ed25519-hd-key = "0.3"
+ed25519-dalek = { version = "2.2.0", features = ["rand_core"] }
+ripemd = "0.1.3"
+bech32 = "0.11.1"
+alloy = { version = "1.8.3", default-features = false, features = ["consensus", "signer-local", "rlp", "eips"] }
+if-addrs = "0.15.0"
+pbkdf2 = "0.12.2"
+ed25519-bip32 = "0.4.2"
+cryptoxide = { version = "0.6.1", features = ["blake2", "digest"] }
 
 # -------- Optimization --------
 [profile.dev.package."*"]
