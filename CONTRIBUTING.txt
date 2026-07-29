@@ -4,7 +4,7 @@ This document outlines the environment setup and the workflow required to mainta
 
 1. System Requirements
 
-	Rust (v1.89+): Installed via rustup.rs.
+	Rust (v1.91+): Installed via rustup.rs.
 
   Cargo Run Bin: Utility to run local project binaries. Install it via:
 

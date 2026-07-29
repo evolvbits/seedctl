@@ -4,29 +4,48 @@ members = ["crates/*", "seedctl"]
 
 # git-cliff to CHANGELOG.md
 [workspace.metadata.bin]
-git-cliff = { version = "2.12.0" }
+git-cliff = { version = "2.13.1" }
 
 [workspace.package]
 description = "Deterministic, auditable, security-focused multichain wallet manager."
 repository = "https://github.com/orbitbits/seedctl"
+homepage = "https://orbitbits.com/seedctl/"
 version = "0.2.4"
-authors = ["OrbitBits <contact.orbitbits@gmail.com>"]
+authors = ["William C. Canin <https://williamcanin.github.io>"]
 edition = "2024"
-rust-version = "1.89"
+rust-version = "1.91"
+license = "GPL-3.0-only"
+readme = "README.md"
+
+[workspace.metadata.seedctl]
+keywords = [
+	"wallet",
+	"cli",
+	"bip39-generator",
+	"criptocurrency",
+	"mnemonic-phrase",
+	]
+categories = ["command-line-utilities"]
+documentation = "https://orbitbits.com/seedctl/documentation/"
+maintainer = "OrbitBits <https://orbitbits.com>"
+copyright = "© 2026 OrbitBits."
 
 [workspace.dependencies]
-seedctl-core = { path = "crates/seedctl-core" }
-seedctl-btc = { path = "crates/seedctl-btc" }
-seedctl-eth = { path = "crates/seedctl-eth" }
-seedctl-bnb = { path = "crates/seedctl-bnb" }
-seedctl-xrp = { path = "crates/seedctl-xrp" }
-seedctl-trx = { path = "crates/seedctl-trx" }
-seedctl-sol = { path = "crates/seedctl-sol" }
-seedctl-ltc = { path = "crates/seedctl-ltc" }
-seedctl-matic = { path = "crates/seedctl-matic" }
-seedctl-ada = { path = "crates/seedctl-ada" }
-seedctl-xmr = { path = "crates/seedctl-xmr" }
-bitcoin = { version = "0.32.8", features = ["base64"] }
+# -------- built-in --------
+seedctl-core  = { version = "0.2.4", path = "crates/seedctl-core" }
+seedctl-btc   = { version = "0.2.4", path = "crates/seedctl-btc" }
+seedctl-eth   = { version = "0.2.4", path = "crates/seedctl-eth" }
+seedctl-bnb   = { version = "0.2.4", path = "crates/seedctl-bnb" }
+seedctl-xrp   = { version = "0.2.4", path = "crates/seedctl-xrp" }
+seedctl-trx   = { version = "0.2.4", path = "crates/seedctl-trx" }
+seedctl-sol   = { version = "0.2.4", path = "crates/seedctl-sol" }
+seedctl-ltc   = { version = "0.2.4", path = "crates/seedctl-ltc" }
+seedctl-matic = { version = "0.2.4", path = "crates/seedctl-matic" }
+seedctl-ada   = { version = "0.2.4", path = "crates/seedctl-ada" }
+seedctl-xmr   = { version = "0.2.4", path = "crates/seedctl-xmr" }
+bitcoin       = { version = "0.32.8", features = ["base64"] }
+
+# -------- vendors --------
 anyhow = "1.0.104"
 serde = { version = "1.0.229", features = ["derive"] }
 reqwest = { version = "0.13.4", features = ["blocking", "json"] }
