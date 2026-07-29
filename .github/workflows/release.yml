@@ -8,6 +8,9 @@ on:
 permissions:
   contents: write
 
+env:
+  GIT_CLIFF_VERSION: "2.13.1"
+
 jobs:
   build:
     name: Build ${{ matrix.artifact_suffix }}
@@ -19,21 +22,25 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+            cargo_alias: release-linux-x86_64
             artifact_suffix: linux-x86_64
             binary_name: seedctl
             dist_name: seedctl-linux-x86_64
           - os: macos-26
             target: aarch64-apple-darwin
+            cargo_alias: release-macos-aarch64
             artifact_suffix: macos-aarch64
             binary_name: seedctl
             dist_name: seedctl-macos-aarch64
           - os: macos-26-intel
             target: x86_64-apple-darwin
+            cargo_alias: release-macos-x86_64
             artifact_suffix: macos-x86_64
             binary_name: seedctl
             dist_name: seedctl-macos-x86_64
           - os: windows-latest
             target: x86_64-pc-windows-msvc
+            cargo_alias: release-windows-x86_64
             artifact_suffix: windows-x86_64
             binary_name: seedctl.exe
             dist_name: seedctl-windows-x86_64.exe
@@ -41,10 +48,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: 1.91.0
           targets: ${{ matrix.target }}
 
       - name: Get version from Cargo.toml
@@ -66,7 +76,7 @@ jobs:
       - name: Build (release)
         env:
           MACOSX_DEPLOYMENT_TARGET: "11.0"
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo ${{ matrix.cargo_alias }}
 
       - name: Build AppImage (Linux)
         if: runner.os == 'Linux'
@@ -112,15 +122,50 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.91.0
+
+      - name: Install git-cliff
+        run: cargo install git-cliff --locked --version "$GIT_CLIFF_VERSION"
 
       - name: Get version from Cargo.toml
         id: version
         run: |
           VERSION=$(cargo pkgid -p seedctl | sed 's/.*#//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes
+        run: |
+          git fetch --force --tags
+          git cliff --config cliff.toml --current --strip header --output RELEASE_NOTES.md
+          perl -0pi -e 's/\n{3,}/\n\n/g; s/\s+\z/\n/' RELEASE_NOTES.md
+          if ! grep -q '^- ' RELEASE_NOTES.md; then
+            printf 'No notable conventional changes for this release.\n' > RELEASE_NOTES.md
+          fi
+
+      - name: Update CHANGELOG.md on default branch
+        run: |
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          git fetch origin "$DEFAULT_BRANCH"
+          git checkout -B "$DEFAULT_BRANCH" "origin/${DEFAULT_BRANCH}"
+          git cliff --config cliff.toml --output CHANGELOG.md
+          perl -0pi -e 's/\n{3,}/\n\n/g; s/\s+\z/\n/' CHANGELOG.md
+
+          if git diff --quiet -- CHANGELOG.md; then
+            echo "CHANGELOG.md is already up to date."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "docs: update changelog for ${{ github.ref_name }} [skip ci]"
+          git push origin "HEAD:${DEFAULT_BRANCH}"
 
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -156,17 +201,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Version ${{ steps.version.outputs.version }}
-          body: |
-            Automatic release generated from Cargo.toml.
-
-            Version: ${{ steps.version.outputs.version }}
-
-            🔐 Files included:
-            - Linux, macOS & Windows binaries
-            - SHA256SUMS
-            - GPG signature (SHA256SUMS.asc)
-
-            ⚠️ Use only in a secure and offline environment.
+          body_path: RELEASE_NOTES.md
           files: |
             dist/*
         env:

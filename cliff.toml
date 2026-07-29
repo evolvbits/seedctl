@@ -6,15 +6,19 @@ header = """
 All notable milestones of this project will be documented in this file.\n
 """
 
-# The body is what will be generated for each version.
 body = """
 {% if version %}\
     # [{{ version | trim_start_matches(pat="v") }}] – {{ timestamp | date(format="%Y-%m-%d") }}
 {% else %}\
     # [unreleased] – {{ now() | date(format="%Y-%m-%d") }}
 {% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+{% if group != "Ignored" %}
+    ## {{ group | upper_first }}
 {% for commit in commits %}
-    - {{ commit.message | upper_first }}\
+    - {% if commit.scope %}**{{ commit.scope }}:** {% endif %}{{ commit.message | upper_first | split(pat="\n") | first }}
+{% endfor %}
+{% endif %}
 {% endfor %}
 \n
 """
@@ -23,7 +27,7 @@ body = """
 trim = true
 
 # IMPORTANT: Change to false to prevent uncommitted versions from appearing "empty" in the log.
-render_always = false
+render_always = true
 
 # Change everything in (#) to link the issues.
 postprocessors = [
@@ -31,30 +35,19 @@ postprocessors = [
 ]
 
 [git]
-# We disabled the filter so that regular commits (without features/fixes) appear in the list.
+conventional_commits = true
 filter_unconventional = false
 filter_commits = false
 use_branch_tags = false
 top_order = true
 
-# Important: Set the parsers to "SKIP" only what is considered junk.
 commit_parsers = [
-    # Ignore release commits
-    { message = "^chore\\(release\\)", skip = true },
-    # Ignore commits that only modify the README.
-    { message = "(?i)readme", skip = true },
-    # Ignore commits that only modify the .gitignore file.
-    { message = "(?i)gitignore", skip = true },
-    { message = "(?i)cargo.lock", skip = true },
-    { message = "(?i)cargo.toml", skip = true },
-    { message = "(?i)changelog", skip = true },
-    { message = "(?i)docs?", skip = true },
-		{ message = "(?i)(TODO)", skip = true },
-    { message = "(?i)^test", skip = true },
-    { message = "(?i)^(merge)", skip = true },
-    { message = "(?i)^(update|updating|updated)", skip = true },
-    { message = "(?i)^(add|adding|added) ", skip = true },
-    { message = "(?i)^(delete|deleting|deleted|remove|removing)", skip = true },
+    { message = "^(?i)feat(\\(.+\\))?!?:", group = "Features" },
+    { message = "^(?i)(fix|bug)(\\(.+\\))?!?:", group = "Bug Fixes" },
+    { message = "^(?i)refactor(\\(.+\\))?!?:", group = "Refactoring" },
+    { message = "^(?i)perf(\\(.+\\))?!?:", group = "Performance" },
+    { message = "^(?i)security(\\(.+\\))?!?:", group = "Security" },
+    { message = ".*", group = "Ignored" },
 ]
 
 # If you want it to ignore merge messages from GitHub:
