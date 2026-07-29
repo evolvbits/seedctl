@@ -2,11 +2,19 @@
 
 All notable milestones of this project will be documented in this file.
 
-# [unreleased] – 2026-07-29
+# [0.2.4] – 2026-07-29
+
+## Bug Fixes
+
+- Harden offline signing and terminal handling
 
 ## Features
 
 - **signing:** Add cold transaction signing
+
+- **cli:** Show workspace credits in help
+
+- **installer:** Add macos install script
 
 # [0.2.3] – 2026-05-20
 
