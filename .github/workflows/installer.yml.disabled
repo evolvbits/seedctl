@@ -23,10 +23,12 @@
 
 #       - name: Prepare _site
 #         run: |
-#           mkdir -p _site/installer
-#           cp installer/linux.sh _site/installer/linux.sh
-#           cp installer/windows.ps1 _site/installer/windows.ps1
-#           chmod +x _site/installer/linux.sh
+#           mkdir -p _site/seedctl
+#           cp installer/linux.sh _site/seedctl/linux.sh
+#           cp installer/macos.sh _site/seedctl/macos.sh
+#           cp installer/windows.ps1 _site/seedctl/windows.ps1
+#           chmod +x _site/seedctl/linux.sh
+#           chmod +x _site/seedctl/macos.sh
 
 #           # Create index.html to redirect https://orbitbits.com/products/seedctl/
 
