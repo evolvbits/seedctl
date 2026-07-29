@@ -1,4 +1,4 @@
-name: Build and Release (Linux & Windows)
+name: Build and Release (Linux, macOS & Windows)
 
 on:
   push:
@@ -10,14 +10,33 @@ permissions:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build ${{ matrix.artifact_suffix }}
     runs-on: ${{ matrix.os }}
 
     strategy:
+      fail-fast: false
       matrix:
-        os:
-          - ubuntu-latest
-          - windows-latest
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_suffix: linux-x86_64
+            binary_name: seedctl
+            dist_name: seedctl-linux-x86_64
+          - os: macos-26
+            target: aarch64-apple-darwin
+            artifact_suffix: macos-aarch64
+            binary_name: seedctl
+            dist_name: seedctl-macos-aarch64
+          - os: macos-26-intel
+            target: x86_64-apple-darwin
+            artifact_suffix: macos-x86_64
+            binary_name: seedctl
+            dist_name: seedctl-macos-x86_64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_suffix: windows-x86_64
+            binary_name: seedctl.exe
+            dist_name: seedctl-windows-x86_64.exe
 
     steps:
       - name: Checkout repository
@@ -25,13 +44,14 @@ jobs:
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
 
       - name: Get version from Cargo.toml
         id: version
         shell: bash
         run: |
-          VERSION=$(cargo metadata --no-deps --format-version=1 \
-            | jq -r '.packages[0].version')
+          VERSION=$(cargo pkgid -p seedctl | sed 's/.*#//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Cache Cargo
@@ -41,10 +61,12 @@ jobs:
             ~/.cargo/registry
             ~/.cargo/git
             target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build (release)
-        run: cargo build --release
+        env:
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Build AppImage (Linux)
         if: runner.os == 'Linux'
@@ -62,29 +84,24 @@ jobs:
           cp -r .github/AppImage AppDir-build
           mkdir -p AppDir-build/usr/bin
       
-          strip target/release/seedctl || true
-          cp target/release/seedctl AppDir-build/usr/bin/seedctl
+          strip target/${{ matrix.target }}/release/seedctl || true
+          cp target/${{ matrix.target }}/release/seedctl AppDir-build/usr/bin/seedctl
 
           # Build AppImage
           mkdir -p dist
           ./appimagetool/AppRun AppDir-build dist/seedctl-${{ steps.version.outputs.version }}-linux-x86_64.AppImage
 
-      - name: Prepare artifacts (Linux)
-        if: runner.os == 'Linux'
+      - name: Prepare binary artifact
+        shell: bash
         run: |
           mkdir -p dist
-          cp target/release/seedctl dist/seedctl-${{ steps.version.outputs.version }}-linux-x86_64
-
-      - name: Prepare artifacts (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mkdir -p dist
-          cp target/release/seedctl.exe dist/seedctl-${{ steps.version.outputs.version }}-windows-x86_64.exe
+          cp "target/${{ matrix.target }}/release/${{ matrix.binary_name }}" \
+             "dist/seedctl-${{ steps.version.outputs.version }}-${{ matrix.dist_name }}"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: binaries-${{ runner.os }}
+          name: binaries-${{ matrix.artifact_suffix }}
           path: dist/*
 
   release:
@@ -102,21 +119,15 @@ jobs:
       - name: Get version from Cargo.toml
         id: version
         run: |
-          VERSION=$(cargo metadata --no-deps --format-version=1 \
-            | jq -r '.packages[0].version')
+          VERSION=$(cargo pkgid -p seedctl | sed 's/.*#//')
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      - name: Download Linux artifact
+      - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: binaries-Linux
           path: dist
-
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries-Windows
-          path: dist
+          pattern: binaries-*
+          merge-multiple: true
 
       # SHA256SUMS
       - name: Generate SHA256SUMS
@@ -143,7 +154,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}
+          tag_name: ${{ github.ref_name }}
           name: Version ${{ steps.version.outputs.version }}
           body: |
             Automatic release generated from Cargo.toml.
@@ -151,7 +162,7 @@ jobs:
             Version: ${{ steps.version.outputs.version }}
 
             🔐 Files included:
-            - Linux & Windows binaries
+            - Linux, macOS & Windows binaries
             - SHA256SUMS
             - GPG signature (SHA256SUMS.asc)
 
